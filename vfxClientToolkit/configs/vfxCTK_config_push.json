@@ -1,0 +1,14 @@
+{
+    "push": {
+        "settings": {
+            "token": "", 
+            "user": ""
+        }, 
+        "metadata": {
+            "enabled": true, 
+            "name": "Push Notifications", 
+            "file": "vfxCTK_config_push", 
+            "description": "etc"
+        }
+    }
+}

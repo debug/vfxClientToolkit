@@ -1,0 +1,64 @@
+#! /usr/local/bin/python3
+
+import os
+import subprocess
+
+from PySide2 import QtGui, QtWidgets
+
+from vfxClientToolkit.icons import MOOSE_ICON
+
+LOCATION = os.path.split(os.path.realpath(__file__))[0]
+
+
+def openIngestIt():
+    subprocess.call(["python3", "{0}/ingestIt".format(LOCATION)])
+
+def openNoteBao():
+    subprocess.call(["python3", "{0}/noteBao".format(LOCATION)])
+
+def openFilmOut():
+    subprocess.call(["python3", "{0}/mrFilmOut".format(LOCATION)])
+
+def openConfigManager():
+    subprocess.call(["python3", os.path.join(LOCATION, "vfxConfigManager")])
+
+
+
+def main():
+    app = QtWidgets.QApplication([])
+    app.setQuitOnLastWindowClosed(False)
+
+    icon = QtGui.QIcon(MOOSE_ICON)
+
+    tray = QtWidgets.QSystemTrayIcon()
+    tray.setIcon(icon)
+    tray.setVisible(True)
+
+    menu = QtWidgets.QMenu()
+    ingestItAction = QtWidgets.QAction("IngestIt")
+    noteBaoAction = QtWidgets.QAction("NoteBao")
+    mrFilmOutAction = QtWidgets.QAction("Mr FilmOut")
+
+    configAction = QtWidgets.QAction("Config Manager")
+    quitAction = QtWidgets.QAction("Quit")
+
+    menu.addAction(ingestItAction)
+    menu.addAction(noteBaoAction)
+    menu.addAction(mrFilmOutAction)
+    menu.addSeparator()
+    menu.addAction(configAction)
+    menu.addSeparator()
+    menu.addAction(quitAction)
+
+    ingestItAction.triggered.connect(openIngestIt)
+    noteBaoAction.triggered.connect(openNoteBao)
+    mrFilmOutAction.triggered.connect(openFilmOut)
+    configAction.triggered.connect(openConfigManager)
+    quitAction.triggered.connect(app.exit)
+
+    tray.setContextMenu(menu)
+
+    app.exec_()
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,304 @@
+#! /usr/local/bin/python3
+
+import sys
+import os
+from os.path import expanduser
+from PySide2 import QtWidgets, QtGui, QtCore
+
+import qtmodern.styles
+import qtmodern.windows
+import xlsxwriter
+
+import vfxClientToolkit.api.sg as sg
+from vfxClientToolkit._version import __version__
+from vfxClientToolkit import __pretty_title__
+from vfxClientToolkit.icons import REFRESH_ICON
+from vfxClientToolkit.api.config import ConfigBundle
+
+PLAYLIST_UNFOLD_LIMIT = 15
+PLAYLIST_LIMIT = 50
+
+VERSION_COUNT_OPTIONS = [str(15), str(25), str(35), str(45)]
+
+PACKAGE_STATUS_MAPPING = {'ip':  'Packaged'}
+
+cb = ConfigBundle()
+CONFIG_DATA = cb.getContexts()
+
+class NoteBaoUi(QtWidgets.QMainWindow):
+
+    WINDOW_TITLE = "NoteBao :: {title} - {version}".format(title=__pretty_title__, version=__version__)
+
+    def __init__(self):
+        QtWidgets.QMainWindow.__init__(self)
+        self.__setup()
+        self.__setupUi()
+        self.__setupSignals()
+        self.__populateWidgets()
+
+    def __setup(self):
+        frame = self.frameGeometry()
+        primaryScreen = QtGui.QGuiApplication.primaryScreen()
+        center = primaryScreen.availableGeometry().center()
+        frame.moveCenter(center)
+        self.move(frame.topLeft())
+        self.setWindowTitle(self.WINDOW_TITLE)
+
+    def __setupUi(self):
+        mainWidget = QtWidgets.QWidget()
+
+        spacer = QtWidgets.QSpacerItem(0,0, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+
+        versionSelectionLayout = QtWidgets.QHBoxLayout()
+        versionSelectionLabel = QtWidgets.QLabel("Version Count:")
+        self.__versionSelectionComboBox = QtWidgets.QComboBox()
+        self.__versionSelectionLoadButton = QtWidgets.QPushButton("")
+        self.__versionSelectionLoadButton.setIcon(QtGui.QIcon(REFRESH_ICON))
+
+        versionSelectionLayout.addItem(spacer)
+        versionSelectionLayout.addWidget(versionSelectionLabel)
+        versionSelectionLayout.addWidget(self.__versionSelectionComboBox)
+        versionSelectionLayout.addWidget(self.__versionSelectionLoadButton)
+
+        layout = QtWidgets.QVBoxLayout()
+
+        mainWidget.setLayout(layout)
+        self.__playlistTree = PlaylistTree()
+
+        buttonLayout = QtWidgets.QHBoxLayout()
+        self.__saveButton = QtWidgets.QPushButton("Save Notes")
+        self.__saveButton.setStyleSheet("background-color: #056600")
+        self.__saveButton.setEnabled(False)
+        self.__separateByVendorCheck = QtWidgets.QCheckBox("Separate By Vendor")
+
+        buttonSpacer = QtWidgets.QSpacerItem(0,0, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+
+        buttonLayout.addWidget(self.__separateByVendorCheck)
+        buttonLayout.addItem(buttonSpacer)
+
+        buttonLayout.addWidget(self.__saveButton)
+
+        layout.addLayout(versionSelectionLayout)
+        layout.addWidget(self.__playlistTree)
+        layout.addLayout(buttonLayout)
+
+        sizegrip = QtWidgets.QSizeGrip(self)
+        layout.addWidget(sizegrip, 0, QtCore.Qt.AlignBottom | QtCore.Qt.AlignRight)
+
+        self.setCentralWidget(mainWidget)
+
+    def __setupSignals(self):
+        self.__saveButton.released.connect(self.__saveNotes)
+        self.__versionSelectionLoadButton.released.connect(self.__reloadNoteTree)
+        self.__playlistTree.itemChanged.connect(self.__treeItemChanged)
+
+    def __treeItemChanged(self):
+        if self.__playlistTree.selectedPlaylists == []:
+            self.__saveButton.setEnabled(False)
+
+        else:
+            self.__saveButton.setEnabled(True)
+
+    def __populateWidgets(self):
+        self.__versionSelectionComboBox.addItems(VERSION_COUNT_OPTIONS)
+
+    def __reloadNoteTree(self):
+        self.__playlistTree.unfoldLimit = int(self.__versionSelectionComboBox.currentText())
+        self.__playlistTree.refresh()
+
+    @QtCore.Slot()
+    def closeEvent(self, event):
+        reply = QtWidgets.QMessageBox.question(self, 'Exit', 'Do you want to exit?')
+
+        if reply == QtWidgets.QMessageBox.Yes:
+            event.accept()
+        else:
+            event.ignore()
+
+    def __saveNotes(self):
+        saveLocation = QtWidgets.QFileDialog.getExistingDirectory(self, "Save Notes", expanduser("~"), QtWidgets.QFileDialog.ShowDirsOnly)
+
+        if saveLocation != "":
+            output = [['Shot Code', 'Version', 'Shot Status', 'Notes', 'Date', 'Version Status', 'Attachments Attached']]
+
+            selectedVersions = self.__playlistTree.selectedVersions
+
+            for playlist in self.__playlistTree.selectedPlaylists:
+
+                path = os.path.join(saveLocation, playlist.playlistObj.name + "_REVIEW_NOTES")
+                try:
+                    os.mkdir(path)
+                except:
+                    pass
+                print(selectedVersions)
+                for version in selectedVersions[playlist.playlistObj.name]:
+                    versionNotes = version.getNotes()
+                    if versionNotes != []:
+
+                        noteStr = ""
+                        for note in versionNotes:
+                            noteStr = noteStr + "\n {0} : {1}".format(note.author['name'], note.content)
+
+                            attachmentFileNames = str()
+
+                            if note.attachments != []:
+                                try:
+                                    os.mkdir(os.path.join(path, version.name))
+                                except:
+                                    pass
+
+                                for attachment in note.attachments:
+                                    fileName = attachment.download(os.path.join(path, version.name))
+                                    print("!!!", fileName)
+                                    attachmentFileNames = attachmentFileNames + "{0}, ".format(os.path.split(fileName)[1])
+                            
+                                versionList = [version.info['entity']['name'], version.name, CONFIG_DATA['shotgun']['settings']['shot_status_mapping'][version.shot.status], noteStr, note.createdAt, version.status, attachmentFileNames]
+                            else:
+                                versionList = [version.info['entity']['name'], version.name, CONFIG_DATA['shotgun']['settings']['shot_status_mapping'][version.shot.status], noteStr, note.createdAt, version.status, ""]
+
+                            output.append(versionList)
+
+
+                outputPath = os.path.join(path, "notes.xlsx")
+                self.__writeExcelFile(output, outputPath)
+
+            QtWidgets.QMessageBox().information(self, "Wubbalubbadubdub \n Note export complete", "Saved \n\n Note export complete.")
+        else:
+            QtWidgets.QMessageBox().information(self, "Oops \n Please select a folder", "Oopsey \n\n Note(s) not saved.")
+
+    def __writeExcelFile(self, data, outputPath):
+        workbook = xlsxwriter.Workbook(outputPath, {'remove_timezone': True})
+
+        worksheet = workbook.add_worksheet("Version Feedback")
+        worksheet.set_column('A:D', 50)
+        worksheet.set_column('E:E', 15)
+        worksheet.set_column('F:EG', 30)
+        
+        cell_format = workbook.add_format({'bold': True, 'font_color': 'black', 'bg_color': '#9c9c9c', 'font_size': 14, 'font_name': 'Arial', 'text_wrap': True})
+        worksheet.write(0, 0, "Shot Code", cell_format)
+        worksheet.write(0, 1, "Version", cell_format)
+        worksheet.write(0, 2, "Shot Status", cell_format)
+        worksheet.write(0, 3, "Notes", cell_format)
+        worksheet.write(0, 4, "Date", cell_format)
+        worksheet.write(0, 5, "Version Status", cell_format)
+        worksheet.write(0, 6, "Attachments", cell_format)
+
+        date_format = workbook.add_format({'num_format': 'dd/mm/yy', 'bold': False, 'font_color': 'black', 'font_size': 14, 'font_name': 'Arial'})
+
+        col = 0
+
+        for row, info in enumerate(data):
+            if row != 0:
+                cell_format = workbook.add_format({'bold': False, 'font_color': 'black', 'font_size': 14, 'font_name': 'Arial'})
+                worksheet.write(row + 1, col, info[0], cell_format)
+                worksheet.write(row + 1, col + 1, info[1], cell_format)
+                worksheet.write(row + 1, col + 2, info[2], cell_format)
+                worksheet.write(row + 1, col + 3, info[3], cell_format)
+                worksheet.write_datetime(row + 1, col + 4, info[4], date_format)
+                worksheet.write(row + 1, col + 5, info[5], cell_format)
+                worksheet.write(row + 1, col + 6, info[6], cell_format)
+
+        workbook.close()
+
+
+class PlaylistTree(QtWidgets.QTreeWidget):
+
+    HEADERS = ["Selected", "Name", "Packaged Status"]
+
+    def __init__(self):
+        QtWidgets.QTreeWidget.__init__(self)
+        self.__playlistStack = []
+        self.__unfoldLimit = 15
+        self.__setup()
+        self.__populateWidget()
+        self.__setupSignals()
+
+    def __setupSignals(self):
+        self.itemChanged.connect(self.__itemChanged)
+
+    def __itemChanged(self, itemChanged, column):
+        if itemChanged.topItem:
+            for i in range(itemChanged.childCount()):
+                childItem = itemChanged.child(i)
+                childItem.setCheckState(0, itemChanged.checkState(0))
+        else:
+            pass
+
+    def __setup(self):
+        self.setHeaderLabels(self.HEADERS)
+
+    def refresh(self):
+        self.__populateWidget()
+
+    def __populateWidget(self):
+        self.clear()
+        self.__playlistStack = []
+        sgHandle = sg.getShotgunHandle()
+        playlists = sg.getPlaylists(sgHandle)
+        for i, playlist in enumerate(playlists):
+
+            if i < PLAYLIST_LIMIT:
+
+                item = QtWidgets.QTreeWidgetItem()
+                item.topItem = True
+                item.setCheckState(0, QtCore.Qt.CheckState.Unchecked)
+                item.setText(1, playlist.name)
+                item.playlistObj = playlist
+
+                self.__playlistStack.append(item)
+
+                self.addTopLevelItem(item)
+
+                if i < self.__unfoldLimit:
+                    versions = playlist.getVersions()
+                    for version in versions:
+                        subVersion = QtWidgets.QTreeWidgetItem()
+                        subVersion.setText(1, version.name)
+                        subVersion.version = version
+
+                        subVersion.topItem = False
+                        item.addChild(subVersion)
+
+        for i in range(len(self.HEADERS)):
+            self.resizeColumnToContents(i)
+
+    @property
+    def unfoldLimit(self):
+        return self.__unfoldLimit
+
+    @unfoldLimit.setter
+    def unfoldLimit(self, unfoldLimitIn):
+        self.__unfoldLimit = unfoldLimitIn
+
+    @property
+    def selectedPlaylists(self):
+        lists = []
+        for playlist in self.__playlistStack:
+            if playlist.checkState(0):
+                lists.append(playlist)
+        return lists
+
+    @property
+    def selectedVersions(self):
+        versions = {}
+        for i in range(self.topLevelItemCount()):
+            topItem = self.topLevelItem(i)
+            versions[topItem.text(1)] = []
+            for i in range(topItem.childCount()):
+                childItem = topItem.child(i)
+                if childItem.checkState(0) == QtCore.Qt.CheckState.Checked:
+                    versions[topItem.text(1)].append(childItem.version)
+
+        return versions
+
+
+def run():
+    app = QtWidgets.QApplication(sys.argv)
+    bui = NoteBaoUi()
+    qtmodern.styles.dark(app)
+    mw = qtmodern.windows.ModernWindow(bui)
+    mw.show()
+    sys.exit(app.exec_())
+
+if __name__ == "__main__":
+    run()

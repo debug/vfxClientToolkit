@@ -1,0 +1,15 @@
+{
+    "filesystem": {
+        "settings": {
+            "posix_prefix": "", 
+            "incoming_root": "",
+            "project_tree_root": ""
+        }, 
+        "metadata": {
+            "enabled": true, 
+            "name": "File System", 
+            "file": "vfxCTK_config_filesystem", 
+            "description": "etc"
+        }
+    }
+}

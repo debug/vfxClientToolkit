@@ -1,0 +1,204 @@
+#! /usr/local/bin/python3
+
+import argparse
+from datetime import date
+from os.path import expanduser
+from pathlib import Path
+
+import xlsxwriter
+from progress.bar import IncrementalBar
+
+import vfxClientToolkit.api.sg as rSG
+import vfxClientToolkit.utils.mail as vfxMail
+from vfxClientToolkit.api.entities import Version
+import vfxClientToolkit.api.config as vfxConfig
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--dups", help="Find Temp #2 and Tech Check Duplicates", action='store_true')
+parser.add_argument("--full", help="Run all reports and email", action='store_true')
+parser.add_argument("--nomail", help="Run all reports and email", action='store_true')
+
+SEQUENCE_WHITE_LIST = []
+DEBUG = False
+TODAY = date.today()
+TODAY = str(TODAY).replace("-", "_")
+
+TEMP_DIR = Path(expanduser("~"))
+
+CONFIG_DATA = vfxConfig.getBundles()
+
+def findNonTempShots():
+    sequences = {}
+    for seq in rSG.getSequences():
+
+        sequences[seq.code] = []
+        shots = seq.getShots()
+        bar = IncrementalBar('Finding Non-Final Shots - {0}'.format(seq.code), max=len(shots))
+        for shot in shots:
+            found = False
+            if shot.info['sg_status_list'] != "omt":
+                for v in shot.getVersions():
+                    if v.info['sg_status_list'] == ['apr']:
+                        found = v
+
+                if isinstance(found, Version):
+                    if found.framePath == None:
+                        sequences[seq.code].append([True, shot.code, found.name, 'Missing EXRs', shot.status])
+                    else:
+                        sequences[seq.code].append([True, shot.code, found.name, 'EXRs Present', shot.status])
+                else:
+                    sequences[seq.code].append([False, shot.code, "N/A", 'N/A', shot.status])
+
+            bar.next()
+
+        if seq.code in SEQUENCE_WHITE_LIST:
+            bar.finish()
+
+    return sequences
+
+
+def findMultipleStatusShots():
+    multiples = {}
+    for seq in rSG.getSequences():
+        if seq.code in SEQUENCE_WHITE_LIST:
+            multiples[seq.code] = {}
+            shots = seq.getShots()
+            bar = IncrementalBar('Finding Duplicate Statuses - {0}'.format(seq.code), max=len(shots))
+            for shot in shots:
+                pendingTechFound = False
+                tempTwoFound = False
+                if shot.info['sg_status_list'] != "omt":
+                    multiples[seq.code][shot.code] = {}
+                    for v in shot.getVersions():
+                        if v.status == "2k Tech Check Pending":
+                            if pendingTechFound:
+                                multiples[seq.code][shot.code]['techCheck'] = v.name
+                                multiples[seq.code][shot.code]['vendor'] = shot.vendor['name']
+                            else:
+                                pendingTechFound = True
+
+                        if v.info['sg_status_list'] == "apr":
+                            if tempTwoFound:
+                                multiples[seq.code][shot.code]['tempTwo'] = v.name
+                                multiples[seq.code][shot.code]['vendor'] = shot.vendor['name']
+                            else:
+                                tempTwoFound = True
+                bar.next()
+            if seq.code in SEQUENCE_WHITE_LIST:
+                bar.finish()
+
+    return multiples
+
+
+def dumpNonTemps(info):
+    excelFile = TEMP_DIR / "shot_final_status_report_{0}.xlsx".format(TODAY)
+
+    workbook = xlsxwriter.Workbook(excelFile)
+    for seq, shots in info.items():
+        worksheet = workbook.add_worksheet(seq)
+        worksheet.set_column('A:A', 25)
+        worksheet.set_column('B:B', 30)
+        worksheet.set_column('C:C', 25)
+        worksheet.set_column('D:D', 25)
+
+        cell_format = workbook.add_format({'bold': True, 'font_color': 'black', 'bg_color': '#9c9c9c', 'font_size': 14, 'font_name': 'Arial'})
+        worksheet.write(0, 0, "Shot", cell_format)
+        worksheet.write(0, 1, "Version", cell_format)
+        worksheet.write(0, 2, "Has EXRs?", cell_format)
+        worksheet.write(0, 3, "Vendor", cell_format)
+
+        col = 0
+
+        for row, shot in enumerate(shots):
+            if shot[0]:
+                cell_format = workbook.add_format({'bold': False, 'font_color': 'black', 'bg_color': '#7c9249', 'font_size': 14, 'font_name': 'Arial'})
+                worksheet.write(row + 1, col, shot[1], cell_format)
+                worksheet.write(row + 1, col + 1, shot[2], cell_format)
+
+                if shot[3] == "Missing EXRs":
+                    missingFormat = workbook.add_format({'bold': False, 'font_color': 'black', 'bg_color': '#e8ae49', 'font_size': 14, 'font_name': 'Arial'})
+                    worksheet.write(row + 1, col + 2, shot[3], missingFormat)
+
+                else:
+                    worksheet.write(row + 1, col + 2, shot[3], cell_format)
+                worksheet.write(row + 1, col + 3, shot[4]['name'], cell_format)
+            else:
+                cell_format = workbook.add_format({'bold': False, 'font_color': 'black', 'bg_color': '#e84949', 'font_size': 14, 'font_name': 'Arial'})
+                worksheet.write(row + 1, col, shot[1], cell_format)
+                worksheet.write(row + 1, col + 1, shot[2], cell_format)
+                worksheet.write(row + 1, col + 2, shot[3], cell_format)
+
+    workbook.close()
+
+    return excelFile
+
+
+def dumpMultipleStatusShots(duplicates):
+    excelFile = TEMP_DIR / "duplicates_statuses_{0}.xlsx".format(TODAY)
+    workbook = xlsxwriter.Workbook(excelFile)
+
+    worksheet = workbook.add_worksheet("Duplicate Statuses")
+    worksheet.set_column('A:B', 25)
+    worksheet.set_column('C:C', 50)
+
+    cell_format = workbook.add_format({'bold': True, 'font_color': 'black', 'bg_color': '#9c9c9c', 'font_size': 14, 'font_name': 'Arial'})
+    worksheet.write(0, 0, "Temp 2", cell_format)
+    worksheet.write(0, 1, "Pending Tech Check", cell_format)
+
+    row = 1
+    col = 0
+    cell_format = workbook.add_format({'bold': False, 'font_color': 'black', 'bg_color': '#7c9249', 'font_size': 14, 'font_name': 'Arial'})
+
+    for seq, shots in duplicates.items():
+        present = False
+        for shot, versions in shots.items():
+            if versions != {}:
+
+                if "tempTwo" in versions:
+                    present = True
+                    worksheet.write(row, col, versions['tempTwo'], cell_format)
+                    worksheet.write(row, col + 2, versions['vendor'], cell_format)
+
+                if "techCheck" in versions:
+                    present = True
+                    worksheet.write(row, col + 1, versions['techCheck'], cell_format)
+                    worksheet.write(row, col + 2, versions['vendor'], cell_format)
+
+                if present:
+                    row = row + 1
+
+    workbook.close()
+
+    return excelFile
+
+
+def sendMail(excelDoc, dupExcel=None):
+
+    subject = "{showName} - Auto Final Status Report {date}".format(showName=CONFIG_DATA['shotgun']['settings']['project_name'], date=TODAY)
+
+    if dupExcel != None:
+        vfxMail.sendMail("See attached for auto-generated reports <br><br>", subject, CONFIG_DATA['reports']['settings']['recipients'], attach=[str(excelDoc), str(dupExcel)])
+    else:
+        vfxMail.sendMail("See attached for auto-generated reports <br><br>", subject, CONFIG_DATA['reports']['settings']['recipients'], attach=[str(excelDoc)])
+
+
+if __name__ == "__main__":
+    args = parser.parse_args()
+
+    if args.dups:
+        duplicates = findMultipleStatusShots()
+        dupExcel = dumpMultipleStatusShots(duplicates)
+
+    elif args.full:
+        duplicates = findMultipleStatusShots()
+        dupExcel = dumpMultipleStatusShots(duplicates)
+        nonTempShots = findNonTempShots()
+        excelFile = dumpNonTemps(nonTempShots)
+        if not args.nomail:
+            sendMail(excelFile, dupExcel=dupExcel)
+
+    else:
+        nonTempShots = findNonTempShots()
+        excelFile = dumpNonTemps(nonTempShots)
+        if not args.nomail:
+            sendMail(excelFile)

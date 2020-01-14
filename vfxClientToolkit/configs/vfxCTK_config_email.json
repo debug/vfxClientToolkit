@@ -1,0 +1,16 @@
+{
+    "email": {
+        "settings": {
+            "username": "", 
+            "password": "", 
+            "smtp": "", 
+            "port": ""
+        }, 
+        "metadata": {
+            "enabled": true, 
+            "name": "Email", 
+            "file": "vfxCTK_config_email", 
+            "description": "etc"
+        }
+    }
+}

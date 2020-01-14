@@ -1,0 +1,186 @@
+#! /usr/local/bin/python3
+
+from PySide2 import QtWidgets, QtCore
+import qtmodern.styles
+import qtmodern.windows
+import sys
+
+from vfxClientToolkit import __pretty_title__
+from vfxClientToolkit.api.config import ConfigBundle
+
+
+class ConfigManagerUi(QtWidgets.QMainWindow):
+
+    TITLE = "{title} - Configuration Manager".format(title=__pretty_title__)
+
+    def __init__(self):
+        QtWidgets.QMainWindow.__init__(self)
+        self.__setup()
+        self.__setupUi()
+        self.__setupSignals()
+
+    def __setup(self):
+        self.__settingTabStack = []
+        cb = ConfigBundle()
+        self.__contexts = cb.getContexts()
+
+    def __setupUi(self):
+        self.setWindowTitle(self.TITLE)
+        mainWidget = QtWidgets.QWidget()
+        self.setCentralWidget(mainWidget)
+
+        mainLayout = QtWidgets.QVBoxLayout()
+        mainWidget.setLayout(mainLayout)
+
+        buttonLayout = QtWidgets.QHBoxLayout()
+
+        buttonSpacer = QtWidgets.QSpacerItem(0, 0,
+                                             QtWidgets.QSizePolicy.Expanding,
+                                             QtWidgets.QSizePolicy.Fixed)
+
+        self.__saveButton = QtWidgets.QPushButton("Save")
+        self.__closeButton = QtWidgets.QPushButton("Close")
+
+        buttonLayout.addItem(buttonSpacer)
+        buttonLayout.addWidget(self.__closeButton)
+        buttonLayout.addWidget(self.__saveButton)
+
+        self.__tabWidget = QtWidgets.QTabWidget()
+        mainLayout.addWidget(self.__tabWidget)
+
+        for context, data in self.__contexts.items():
+            settingsWidget = SettingsWidget(data)
+
+            self.__settingTabStack.append(settingsWidget)
+            self.__tabWidget.addTab(settingsWidget, data['metadata']['name'])
+
+        mainLayout.addLayout(buttonLayout)
+
+        sizeGripper = QtWidgets.QSizeGrip(self)
+        mainLayout.addWidget(sizeGripper, 0, QtCore.Qt.AlignBottom | QtCore.Qt.AlignRight)
+
+    def __setupSignals(self):
+        self.__saveButton.released.connect(self.__saveConfig)
+        self.__closeButton.released.connect(self.close)
+
+    def __saveConfig(self):
+        for widget in self.__settingTabStack:
+            widget.save()
+
+    @QtCore.Slot()
+    def closeEvent(self, event):
+        reply = QtWidgets.QMessageBox.question(self, 'Exit', 'Do you want to exit?')
+
+        if reply == QtWidgets.QMessageBox.Yes:
+            event.accept()
+        else:
+            event.ignore()
+
+
+class SettingsWidget(QtWidgets.QWidget):
+
+    def __init__(self, settings):
+        QtWidgets.QWidget.__init__(self)
+        self.__settings = settings
+        self.__setupUi()
+
+    def __setupUi(self):
+        layoutSpacer = QtWidgets.QSpacerItem(0, 0,
+                                             QtWidgets.QSizePolicy.Expanding,
+                                             QtWidgets.QSizePolicy.Expanding)
+
+        layout = QtWidgets.QVBoxLayout()
+        for settingName, settingData in self.__settings['settings'].items():
+            if isinstance(settingData, str):
+                stringSettingWidget = SettingsStringWidget(settingName, settingData)
+                layout.addWidget(stringSettingWidget)
+
+            elif isinstance(settingData, dict):
+                dictSettingWidget = SettingsDictWidget(settingName, settingData)
+                layout.addWidget(dictSettingWidget)
+
+            elif isinstance(settingData, list):
+                listSettingWidget = SettingsListWidget(settingName, settingData)
+                layout.addWidget(listSettingWidget)
+
+        layout.addItem(layoutSpacer)
+        self.setLayout(layout)
+
+    def save(self):
+        print(self.__settings['metadata']['file'])
+
+
+class SettingsStringWidget(QtWidgets.QWidget):
+
+    def __init__(self, label, data):
+        QtWidgets.QWidget.__init__(self)
+        self.__label = label
+        self.__data = data
+        self.__setupUi()
+
+    def __setupUi(self):
+        layout = QtWidgets.QHBoxLayout()
+        label = QtWidgets.QLabel(self.__label)
+        layout.addWidget(label)
+
+        self.__lineEdit = QtWidgets.QLineEdit()
+        self.__lineEdit.setText(self.__data)
+        layout.addWidget(self.__lineEdit)
+
+        self.setLayout(layout)
+
+
+class SettingsDictWidget(QtWidgets.QWidget):
+
+    def __init__(self, label, data):
+        QtWidgets.QWidget.__init__(self)
+        self.__label = label
+        self.__data = data
+        self.__setupUi()
+
+    def __setupUi(self):
+        layout = QtWidgets.QHBoxLayout()
+        label = QtWidgets.QLabel(self.__label)
+        layout.addWidget(label)
+
+        self.__combobox = QtWidgets.QComboBox()
+        for item, data in self.__data.items():
+            self.__combobox.addItem("{0} - {1}".format(item, data))
+        layout.addWidget(self.__combobox)
+
+        self.setLayout(layout)
+
+
+class SettingsListWidget(QtWidgets.QWidget):
+
+    def __init__(self, label, data):
+        QtWidgets.QWidget.__init__(self)
+        self.__label = label
+        self.__data = data
+        self.__setupUi()
+
+    def __setupUi(self):
+        layout = QtWidgets.QHBoxLayout()
+        label = QtWidgets.QLabel(self.__label)
+        layout.addWidget(label)
+
+        self.__combobox = QtWidgets.QComboBox()
+        for item in self.__data:
+            self.__combobox.addItem(str(item))
+
+        layout.addWidget(self.__combobox)
+
+        self.setLayout(layout)
+
+
+def run():
+    app = QtWidgets.QApplication(sys.argv)
+    ui = ConfigManagerUi()
+    qtmodern.styles.dark(app)
+    mw = qtmodern.windows.ModernWindow(ui)
+    mw.show()
+    sys.exit(app.exec_())
+
+
+if __name__ == "__main__":
+    run()

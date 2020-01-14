@@ -1,0 +1,24 @@
+{
+    "mailIt": {
+        "metadata": {
+            "enabled": true, 
+            "name": "Mail It", 
+            "file": "vfxCTK_config_mailIt", 
+            "description": "etc"
+        }, 
+        "settings": {
+            "rv": "", 
+            "sequence_whitelist": [
+                ""
+            ], 
+            "recipients_by_vendor": {
+                "Digital Domain": [
+                    "dom@reality-debug.co.uk"
+                ]
+            }, 
+            "recipients": [
+                "dom@reality-debug.co.uk"
+            ]
+        }
+    }
+}

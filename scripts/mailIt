@@ -1,0 +1,118 @@
+#! /usr/local/bin/python3
+
+import os
+
+from progress.bar import IncrementalBar
+
+import json
+
+from prompt_toolkit.shortcuts import radiolist_dialog
+
+import vfxClientToolkit.api.sg as vfxSG
+
+import json2html
+
+import vfxClientToolkit
+from vfxClientToolkit import __pretty_title__
+from vfxClientToolkit._version import __version__
+import vfxClientToolkit.api.config as vfxConfig
+import vfxClientToolkit.utils.mail as mailUtils
+
+TEMPLATE_FILE = os.path.join(os.path.split(vfxClientToolkit.__file__)[0], "html_templates", "template.html")
+ROOT_DIR = os.path.split(os.path.realpath(__file__))[0]
+
+PLAYLIST_LIMIT = 45
+
+CONFIG_DATA = vfxConfig.getBundles()
+
+SEQUENCE_WHITELIST = CONFIG_DATA['mailIt']['settings']['sequence_whitelist']
+SHOT_STATUS_MAPPING = CONFIG_DATA['shotgun']['settings']['shot_status_mapping']
+RECIPIENTS_BY_VENDOR = CONFIG_DATA['mailIt']['settings']['recipients_by_vendor']
+
+def getRecipentsByVendor(vendor):
+    return RECIPIENTS_BY_VENDOR[vendor]
+
+
+def getPlaylists():
+    parsedLists = []
+    sgH = vfxSG.getShotgunHandle()
+    playlists = vfxSG.getPlaylists(sgH)
+    for i, playlist in enumerate(playlists):
+        if i >= PLAYLIST_LIMIT:
+            break
+        else:
+            parsedLists.append(playlist)
+
+    return parsedLists
+
+
+def run():
+    introText = "\nPlease select a playlist: \n"
+    title = "Mail It :: {title} - {version}".format(title=__pretty_title__, version=__version__)
+
+    playlists = getPlaylists()
+    playlistChoices = []
+    for playlist in playlists:
+        playlistChoices.append((playlist, playlist.name))
+
+    result = radiolist_dialog(
+        values=playlistChoices,
+        title=title,
+        text=introText,
+    )
+    if result != None:
+        versions = result.getVersions()
+        
+        sortedVersions = {}
+
+        bar = IncrementalBar('Processing', max=len(versions))
+
+        for version in versions:
+            seqName = version.name.split("_")[0].upper()[0:3]
+            if seqName in SEQUENCE_WHITELIST:
+                if version.shot.vendorGroups[0]['name'] in sortedVersions:
+                    sortedVersions[version.shot.vendorGroups[0]['name']].append({'Version': version.name, 'Status': version.status, 'Shot Status': SHOT_STATUS_MAPPING[version.shot.status]})
+                else:
+                    sortedVersions[version.shot.vendorGroups[0]['name']] = []
+
+                    sortedVersions[version.shot.vendorGroups[0]['name']].append({'Version': version.name, 'Status': version.status, 'Shot Status': SHOT_STATUS_MAPPING[version.shot.status]})
+
+            bar.next()
+
+        jsonDump = json.dumps(sortedVersions)
+
+        bar.finish()
+
+        recipients = []
+        for vendor in sortedVersions:
+            for rep in getRecipentsByVendor(vendor):
+                recipients.append(rep)
+
+
+        recipients = list(set(recipients))
+
+        fh = open(TEMPLATE_FILE, 'r')
+        htmlTemplate = fh.read()
+        htmlDump = json2html.json2html.convert(json = jsonDump, table_attributes="border=\"1px\", cellpadding=\"10\"")
+
+        emailBody = htmlTemplate + htmlDump
+
+        emailBody = emailBody + "<br><br> Thanks"
+
+        fh.close()
+
+        return [emailBody, result.name, recipients]
+
+    else:
+        return []
+
+
+if __name__ == "__main__":
+    results = run()
+    #msg, subject, recipients = run()
+    if results == []:
+        pass
+    else:
+        mailUtils.sendMail(results[0], "{0} - {1}".format(CONFIG_DATA['shotgun']['settings']['project_name'], results[1]), results[2])
+        print("Done!")
+

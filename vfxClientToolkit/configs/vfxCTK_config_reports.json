@@ -1,0 +1,15 @@
+{
+    "reports": {
+        "settings": {
+            "recipients": [
+                "dom@reality-debug.co.uk"
+            ]
+        }, 
+        "metadata": {
+            "enabled": true, 
+            "name": "Reports", 
+            "file": "vfxCTK_config_reports", 
+            "description": "etc"
+        }
+    }
+}

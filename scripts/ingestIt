@@ -1,0 +1,372 @@
+#! /usr/local/bin/python3
+import os
+import sys
+import re
+from pathlib import Path
+import json
+from enum import Enum
+
+from PySide2 import QtGui, QtWidgets, QtCore
+
+import qtmodern.styles
+import qtmodern.windows
+import json2html
+
+from vfxClientToolkit.icons import REFRESH_ICON, JAKE_ICON, CHECKED_ICON
+from vfxClientToolkit import __pretty_title__
+from vfxClientToolkit._version import __version__
+import vfxClientToolkit.api.sg as sg
+import vfxClientToolkit.api.config as vfxConfig
+import vfxClientToolkit.utils.system as systemUtils
+import vfxClientToolkit.utils.metadata as metadataUtils
+import vfxClientToolkit.utils.push as pushUtils
+import vfxClientToolkit.utils.mail as mailUtils
+from vfxClientToolkit.api.entities import Playlist
+
+CONFIG_DATA = vfxConfig.getBundles()
+
+DEBUG = False
+
+HTML_STREAM = str()
+
+
+class ConsoleStatus(Enum):
+    SUCCESS = 0
+    WARNING = 1
+    FAILURE = 2
+
+
+class IngestUi(QtWidgets.QMainWindow):
+
+    WINDOW_TITLE = "Ingest It :: {title} - {version}".format(title=__pretty_title__,
+                                                             version=__version__)
+
+    def __init__(self):
+        QtWidgets.QMainWindow.__init__(self)
+        self.__setup()
+        self.__setupUi()
+        self.__setupMenus()
+        self.__setupSignals()
+
+    def __setup(self):
+        frame = self.frameGeometry()
+        primaryScreen = QtGui.QGuiApplication.primaryScreen()
+        center = primaryScreen.availableGeometry().center()
+        frame.moveCenter(center)
+        self.move(frame.topLeft())
+        self.setWindowTitle(self.WINDOW_TITLE)
+
+    def __setupUi(self):
+        centralWidget = QtWidgets.QWidget()
+        mainLayout = QtWidgets.QVBoxLayout()
+        centralWidget.setLayout(mainLayout)
+        buttonLayout = QtWidgets.QHBoxLayout()
+
+        centralLayout = QtWidgets.QHBoxLayout()
+
+        self.__directoryTree = DirectoryTree()
+
+        topButtonBarLayout = QtWidgets.QHBoxLayout()
+
+        self.__refreshButton = QtWidgets.QPushButton("")
+        self.__refreshButton.setIcon(QtGui.QIcon(REFRESH_ICON))
+        topButtonSpacer = QtWidgets.QSpacerItem(0, 0, QtWidgets.QSizePolicy.Expanding,
+                                                QtWidgets.QSizePolicy.Fixed)
+
+        topButtonBarLayout.addItem(topButtonSpacer)
+        topButtonBarLayout.addWidget(self.__refreshButton)
+
+        incomingGroupBox = QtWidgets.QGroupBox("Incoming Directories:")
+        incomingGroupBoxLayout = QtWidgets.QHBoxLayout()
+        incomingGroupBoxLayout.addWidget(self.__directoryTree)
+        incomingGroupBox.setLayout(incomingGroupBoxLayout)
+
+        centralLayout.addWidget(incomingGroupBox)
+
+        self.__submitButton = QtWidgets.QPushButton("Submit")
+        self.__submitButton.setEnabled(False)
+        self.__submitButton.setStyleSheet("background-color: #056600")
+
+        buttonSpacer = QtWidgets.QSpacerItem(0, 0, QtWidgets.QSizePolicy.Expanding,
+                                             QtWidgets.QSizePolicy.Fixed)
+
+        self.__outputGroupBox = OutputGroupBox()
+        buttonLayout.addItem(buttonSpacer)
+        buttonLayout.addWidget(self.__submitButton)
+
+        mainLayout.addLayout(topButtonBarLayout)
+        mainLayout.addLayout(centralLayout)
+        mainLayout.addWidget(self.__outputGroupBox)
+        mainLayout.addLayout(buttonLayout)
+        sizegrip = QtWidgets.QSizeGrip(self)
+        mainLayout.addWidget(sizegrip, 0, QtCore.Qt.AlignBottom | QtCore.Qt.AlignRight)
+
+        self.setCentralWidget(centralWidget)
+
+    def __setupMenus(self):
+        self.__helpMenu = QtWidgets.QMenu('&Help')
+        self.__aboutAction = self.__helpMenu.addAction('&About')
+        self.menuBar().addMenu(self.__helpMenu)
+
+    def __setupSignals(self):
+        self.__submitButton.released.connect(self.__doIt)
+        self.__refreshButton.released.connect(self.__refreshTree)
+        self.__directoryTree.itemChanged.connect(self.__treeItemChanged)
+        self.__aboutAction.triggered.connect(self.__openAbout)
+
+    def __openAbout(self):
+        pass
+
+    def __treeItemChanged(self):
+        if self.__directoryTree.getSelectedItems() == []:
+            self.__submitButton.setEnabled(False)
+        else:
+            self.__submitButton.setEnabled(True)
+
+    def __refreshTree(self):
+        self.__directoryTree.refresh()
+
+    def __updateStatus(self, output, status):
+        self.__updateConsole(output, status)
+        self.__updateLog(output, status)
+
+    def __doIt(self):
+        if systemUtils.checkDriveMounts():
+            shotgunHandle = sg.getShotgunHandle()
+
+            versionIds = []
+
+            selectedItems = self.__directoryTree.getSelectedItems()
+            self.__openProgressDialog()
+            self.__outputGroupBox.clearText()
+
+            for i, item in enumerate(selectedItems):
+
+                summaryList = []
+                manifest = metadataUtils.buildExtendedManifest(item.path)
+                self.__outputGroupBox.appendText("Starting processing :: {0}".format(item.path),
+                                                 ConsoleStatus.SUCCESS, item.path)
+
+                self.progress.setMaximum(len(manifest))
+
+                for v, file in enumerate(manifest):
+
+                    self.progress.setValue(v)
+                    versionObj = sg.getVersion(file['version_name'], shotgunHandle)
+
+                    if versionObj == [] or versionObj == None:
+                        movFile = systemUtils.copyMov(file['mov_file'], file)
+
+                        if file['exrs'] is not None:
+                            exrs = systemUtils.copyEXRs(file['exrs'], file)
+                            self.__outputGroupBox.appendText("Success - Copying EXRs :: {0}".format(file['version_name']), ConsoleStatus.SUCCESS, item.path)
+
+                        if file['support_files'] is not None:
+                            systemUtils.copySupportFiles(file['support_files'], file)
+                            self.__outputGroupBox.appendText("Success - Copying support files :: {0}".format(file['support_files']), ConsoleStatus.SUCCESS, item.path)
+
+                        self.__outputGroupBox.appendText("Success - Uploaded to SG :: {0}".format(file['version_name']), ConsoleStatus.SUCCESS, item.path)
+                        summaryList.append("Success - Uploaded to SG :: {0}".format(file['version_name']))
+
+                        if file['exrs'] is not None:
+                            version = file['shot_entity'].createVersion(file, movFile, file['dept'], item.vendorInfo, pathToFrames=exrs)
+                        else:
+                            version = file['shot_entity'].createVersion(file, movFile, file['dept'], item.vendorInfo, pathToFrames=exrs)
+
+                        version.uploadMov(movFile)
+                        versionIds.append(version.info['id'])
+
+                    else:
+                        if versionObj.framePath != None:
+                            exrs = systemUtils.copyEXRs(file['exrs'], file)
+                            paddedFramePath = re.sub("[0-9][0-9][0-9][0-9].exr", "####.exr", str(exrs))
+                            versionObj.setAttribute("sg_path_to_frames", paddedFramePath)
+                            self.__outputGroupBox.appendText("Success - Attaching EXRs to existing version :: {0}".format(file['version_name']), ConsoleStatus.WARNING, item.path)
+                        versionIds.append(versionObj.info['id'])
+
+                        if file['support_files'] is not None:
+                            systemUtils.copySupportFiles(file['support_files'], file)
+                            self.__outputGroupBox.appendText("Success - Copying support files :: {0}".format(file['support_files']), ConsoleStatus.SUCCESS, item.path)
+
+                        self.__outputGroupBox.appendText("Duplicate version found in Shotgun :: {0}".format(file['version_name']), ConsoleStatus.FAILURE, item.path)
+                        summaryList.append("Failure - Duplicate version found n Shotgun :: {0}".format(file['version_name']))
+            self.__outputGroupBox.appendText("Finished processing :: {0}</font>".format(item.path), ConsoleStatus.SUCCESS, item.path)
+
+            filePathDir = "{0}/.ingested".format(item.path)
+            Path(filePathDir).touch()
+
+            self.progress.close()
+
+            playlistName = self.__createPlaylist(item.path, versionIds)
+            self.__sendMail(summaryList, playlistName)
+            pushUtils.sendPushNotification("{0} :: Ingested".format(playlistName), "{0} :: Ingested".format(playlistName))
+
+            self.__outputGroupBox.appendText("Nom Nom Nom.. Me still hungry", ConsoleStatus.SUCCESS, item.path)
+
+            QtWidgets.QMessageBox().information(self, "Wubbalubbadubdub \n Ingest Complete", "Wubbalubbadubdub! \n\n Ingest Complete.")
+
+        else:
+            QtWidgets.QMessageBox().warning(self, "Drives aren't mounted.", "Error! \n\n Drives aren't mounted.")
+
+    def __sendMail(self, summaryList, playlistName):
+        jsonDump = json.dumps(summaryList)
+        htmlDump = json2html.json2html.convert(json=jsonDump, table_attributes="border=\"1px\", cellpadding=\"10\"")
+        mailUtils.sendMail(htmlDump, "{0} :: Ingest Report".format(playlistName), CONFIG_DATA['ingestIt']['settings']['email_recipients'])
+
+    def __createPlaylist(self, packagePath, versions):
+        baseName = os.path.basename(packagePath)
+        dateDir = baseName.split("_")[0]
+        if dateDir[-1] == "a" or dateDir[-1] == "b" or dateDir[-1] == "c":
+            dateDir = dateDir[:-1]
+
+        playlistName = packagePath
+
+        Playlist.createPlaylist(playlistName, versions)
+
+        return baseName
+
+    @QtCore.Slot()
+    def closeEvent(self, event):
+        reply = QtWidgets.QMessageBox.question(self, 'Exit', 'Do you want to exit?')
+
+        if reply == QtWidgets.QMessageBox.Yes:
+            event.accept()
+        else:
+            event.ignore()
+
+    def __openProgressDialog(self):
+        self.progress = QtWidgets.QProgressDialog(self)
+        self.progress.setMinimum(1)
+        self.progress.setWindowModality(QtCore.Qt.WindowModal)
+        self.progress.setWindowTitle("Ingesting")
+        self.progress.show()
+
+
+class OutputGroupBox(QtWidgets.QGroupBox):
+
+    TITLE = "Output:"
+
+    def __init__(self):
+        QtWidgets.QGroupBox.__init__(self, self.TITLE)
+        self.__textStack = str()
+        self.__setupUi()
+
+    def __setupUi(self):
+        self.__logOutput = QtWidgets.QTextEdit()
+
+        layout = QtWidgets.QHBoxLayout()
+        layout.addWidget(self.__logOutput)
+        self.setLayout(layout)
+
+    def clearText(self):
+        self.__textStack = str()
+        self.__logOutput.clear()
+
+    def appendText(self, text, status, logPath):
+
+        self.__writeLog(text, logPath)
+
+        if status == ConsoleStatus.SUCCESS:
+            htmlText = "<font color=\"white\">{0}</font>".format(text)
+        elif status == ConsoleStatus.WARNING:
+            htmlText = "<font color=\"orange\">{0}</font>".format(text)
+        elif status == ConsoleStatus.FAILURE:
+            htmlText = "<font color=\"#c72323\">{0}</font>".format(text)
+
+        self.__textStack = self.__textStack + "{0}<br>".format(htmlText)
+        self.__logOutput.setHtml(self.__textStack)
+
+    def __writeLog(self, outputText, logPath):
+        fh = open(os.path.join(logPath, 'log.txt'), 'a')
+        fh.write("{0}\n".format(outputText))
+        fh.close()
+
+
+class DirectoryTree(QtWidgets.QTreeWidget):
+
+    HEADERS = ["Selected", "Name", "Vendor", "Status"]
+
+    def __init__(self):
+        QtWidgets.QTreeWidget.__init__(self)
+        self.__itemStack = []
+        self.__setup()
+
+    def __setup(self):
+        self.clear()
+        self.setHeaderLabels(self.HEADERS)
+
+        for directory in systemUtils.listIncomingDirectories():
+            dItem = DirectoryItem(directory)
+
+            self.__itemStack.append(dItem)
+            self.addTopLevelItem(dItem)
+
+        for i in range(len(self.HEADERS)):
+            self.resizeColumnToContents(i)
+
+    def getSelectedItems(self):
+        items = []
+        for item in self.__itemStack:
+            if item.checkState(0):
+                items.append(item)
+
+        return items
+
+    def refresh(self):
+        self.__itemStack = []
+        self.__setup()
+
+
+class DirectoryItem(QtWidgets.QTreeWidgetItem):
+    FILE_TOKEN = ".ingested"
+
+    def __init__(self, directoryPath):
+        QtWidgets.QTreeWidgetItem.__init__(self)
+        self.__directoryPath = directoryPath
+        self.__setup()
+
+    def __setup(self):
+        if os.path.exists("{0}/{1}".format(self.path, self.FILE_TOKEN)):
+
+            self.setIcon(3, QtGui.QIcon(CHECKED_ICON))
+            self.setCheckState(0, QtCore.Qt.CheckState.Unchecked)
+        else:
+            self.setIcon(3, QtGui.QIcon(JAKE_ICON))
+            self.setCheckState(0, QtCore.Qt.CheckState.Unchecked)
+
+        self.setText(1, self.path.split("/")[-1])
+
+        self.__vendorInfo = metadataUtils.getVendor(os.path.basename(self.path))
+
+        if self.__vendorInfo is not None:
+            self.setText(2, self.__vendorInfo['name'])
+        else:
+            self.setText(2, "")
+
+    @property
+    def vendorInfo(self):
+        return self.__vendorInfo
+
+    @property
+    def path(self):
+        return self.__directoryPath
+
+    #def exrs(self):
+    #    exrDirs = {}
+    #    for shotEXRs in glob.glob(os.path.join(self.path, "EXR/*")):
+    #        exrDirs[os.path.basename(shotEXRs)] = shotEXRs
+
+    #    return exrDirs
+
+
+def run():
+    app = QtWidgets.QApplication(sys.argv)
+    ui = IngestUi()
+    qtmodern.styles.dark(app)
+    mw = qtmodern.windows.ModernWindow(ui)
+    mw.show()
+    sys.exit(app.exec_())
+
+
+if __name__ == "__main__":
+    run()

@@ -1,0 +1,37 @@
+{
+    "ingestIt": {
+        "settings": {
+            "vendor_mapping": {
+                "SL_MC": {
+                    "shortName": "SL_MC", 
+                    "name": "Scanline Munich", 
+                    "id": 185
+                }, 
+                "DD": {
+                    "shortName": "DD", 
+                    "name": "Digital Domain", 
+                    "id": 89
+                }, 
+                "SL_VC": {
+                    "shortName": "SL_VC", 
+                    "name": "Scanline Vancouver", 
+                    "id": 138
+                }, 
+                "MG": {
+                    "shortName": "MG", 
+                    "name": "Macrograph", 
+                    "id": 177
+                }
+            }, 
+            "email_recipients": [
+                ""
+            ]
+        }, 
+        "metadata": {
+            "enabled": true, 
+            "name": "Ingest It", 
+            "file": "vfxCTK_config_ingestIt", 
+            "description": "etc"
+        }
+    }
+}

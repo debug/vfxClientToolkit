@@ -1,0 +1,28 @@
+{
+    "mrFilmOut": {
+        "settings": {
+            "dropbox": {
+                "access_token": "", 
+                "namespace_id": ""
+            }, 
+            "dropbox_root_prefix": "to_DI", 
+            "default_write_location": "", 
+            "email_recipients": [
+                ""
+            ], 
+            "delivery_destinations": [
+                {
+                    "type": "Group", 
+                    "id": 16, 
+                    "name": "DI_House"
+                }
+            ]
+        }, 
+        "metadata": {
+            "enabled": true, 
+            "name": "MrFilmOut", 
+            "file": "vfxCTK_config_mrFilmOut", 
+            "description": "etc"
+        }
+    }
+}

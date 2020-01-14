@@ -1,0 +1,882 @@
+#! /usr/local/bin/python3
+
+import sys
+import os
+import re
+import shutil
+
+import xlsxwriter
+from PySide2 import QtGui, QtWidgets, QtCore
+import qtmodern.styles
+import qtmodern.windows
+
+from vfxClientToolkit import __pretty_title__
+from vfxClientToolkit._version import __version__
+from vfxClientToolkit.icons import ARROW_RIGHT, ARROW_LEFT, PACKAGE_ICON, REFRESH_ICON
+import vfxClientToolkit.utils.mail as utilsMail
+import vfxClientToolkit.utils.push as utilsPush
+import vfxClientToolkit.api.dropbox as vfxDropbox
+import vfxClientToolkit.api.sg as vfxSG
+import vfxClientToolkit.utils.system as systemUtils
+import vfxClientToolkit.api.config as vfxConfig
+
+DEBUG = False
+PLAYLIST_LIMIT = 35
+
+CONFIG_DATA = vfxConfig.getBundles()
+
+class MrFilmOutUi(QtWidgets.QWidget):
+
+    TITLE = "{title} - Call Mr FilmOut, that name again is Mr FilmOut - {version}".format(title=__pretty_title__, version=__version__)
+
+    def __init__(self):
+        QtWidgets.QWidget.__init__(self)
+        self.forceClose = False
+        self.__setup()
+        self.__setupUi()
+        self.__setupSignals()
+
+    def __setup(self):
+        frame = self.frameGeometry()
+        primaryScreen = QtGui.QGuiApplication.primaryScreen()
+        center = primaryScreen.availableGeometry().center()
+        frame.moveCenter(center)
+        self.move(frame.topLeft())
+
+    def __setupUi(self):
+        self.resize(1164, 766)
+        self.setWindowTitle(self.TITLE)
+        layout = QtWidgets.QVBoxLayout()
+
+        self.__selectedList = SelectedListList()
+        buttonLayout = QtWidgets.QHBoxLayout()
+        buttonSpacer = QtWidgets.QSpacerItem(0, 0,
+                                             QtWidgets.QSizePolicy.Expanding,
+                                             QtWidgets.QSizePolicy.Fixed)
+
+        self.__closeButton = QtWidgets.QPushButton("Close")
+        self.__packageButton = QtWidgets.QPushButton("Package")
+        self.__packageButton.setEnabled(False)
+
+        self.__packageButton.setStyleSheet("background-color: #056600")
+
+        self.__packageButton.setIcon(QtGui.QIcon(PACKAGE_ICON))
+
+        buttonLayout.addItem(buttonSpacer)
+        buttonLayout.addWidget(self.__closeButton)
+        buttonLayout.addWidget(self.__packageButton)
+
+        centerBoxLayout = QtWidgets.QHBoxLayout()
+        addRemoveButtonsLayout = QtWidgets.QVBoxLayout()
+
+        centerSpacerTop = QtWidgets.QSpacerItem(0, 0,
+                                                QtWidgets.QSizePolicy.Fixed,
+                                                QtWidgets.QSizePolicy.Expanding)
+
+        centerSpacerBottom = QtWidgets.QSpacerItem(0, 0,
+                                                   QtWidgets.QSizePolicy.Fixed,
+                                                   QtWidgets.QSizePolicy.Expanding)
+
+        self.__addButton = QtWidgets.QPushButton("")
+        self.__addButton.setIcon(QtGui.QIcon(ARROW_RIGHT))
+
+        self.__removeButton = QtWidgets.QPushButton("")
+        self.__removeButton.setIcon(QtGui.QIcon(ARROW_LEFT))
+
+        addRemoveButtonsLayout.addItem(centerSpacerTop)
+        addRemoveButtonsLayout.addWidget(self.__addButton)
+        addRemoveButtonsLayout.addWidget(self.__removeButton)
+        addRemoveButtonsLayout.addItem(centerSpacerBottom)
+
+        self.__sequenceTree = SequenceTree()
+        initialSequence = vfxSG.getSequences()[0]
+
+        self.__sequenceTree.sequence = initialSequence.code
+
+        centerBoxLayout.addWidget(self.__sequenceTree)
+        centerBoxLayout.addLayout(addRemoveButtonsLayout)
+        centerBoxLayout.addWidget(self.__selectedList)
+
+        centerBoxWidget = QtWidgets.QWidget()
+        centerBoxWidget.setLayout(centerBoxLayout)
+
+        self.__filterPanel = FilterPanel()
+        self.__configPanel = ConfigPanel()
+
+        self.__playlistTree = PlaylistTree()
+
+        self.__tabWidget = QtWidgets.QTabWidget()
+        self.__tabWidget.addTab(centerBoxWidget, "Search")
+        self.__tabWidget.addTab(self.__playlistTree, "Playlist")
+
+        layout.addLayout(self.__filterPanel)
+        layout.addWidget(self.__tabWidget)
+        layout.addWidget(self.__configPanel)
+        layout.addLayout(buttonLayout)
+
+        sizegrip = QtWidgets.QSizeGrip(self)
+        layout.addWidget(sizegrip, 0, QtCore.Qt.AlignBottom | QtCore.Qt.AlignRight)
+
+        self.setLayout(layout)
+
+    def __setupSignals(self):
+        self.__closeButton.released.connect(self.close)
+        self.__packageButton.released.connect(self.__packageIt)
+
+        self.__addButton.released.connect(self.__addVersion)
+        self.__removeButton.released.connect(self.__removeVersion)
+        self.__filterPanel.sequenceCombo.currentTextChanged.connect(self.__sequenceChanged)
+        self.__filterPanel.loadButton.released.connect(self.__refreshTree)
+        self.__filterPanel.searchLineEdit.textChanged.connect(self.__searchTextChanged)
+        self.__tabWidget.currentChanged.connect(self.__tabWidgetChanged)
+        self.__playlistTree.itemChanged.connect(self.__playlistItemChanged)
+
+    def __playlistItemChanged(self):
+        if self.__playlistTree.selectedPlaylists == []:
+            self.__packageButton.setEnabled(False)
+        else:
+            self.__packageButton.setEnabled(True)
+
+    def __tabWidgetChanged(self, indexIn):
+        self.__filterPanel.switchReloadButton(indexIn)
+
+    def __sequenceChanged(self, sequenceName):
+        self.__sequenceTree.sequence = sequenceName
+
+    def __searchTextChanged(self, textIn):
+        self.__sequenceTree.doSearch(textIn)
+
+    def __refreshTree(self):
+        if self.__tabWidget.currentIndex() == 0:
+            settings = self.__filterPanel.settings
+            self.__sequenceTree.refresh(settings)
+        else:
+            self.__playlistTree.refresh()
+
+    def __packageIt(self):
+        if systemUtils.checkDriveMounts():
+            output = [
+                       [
+                        'Deliver to DI#',
+                        'Shot',
+                        'Version Name',
+                        'Vendor',
+                        'Handles',
+                        '2k Tech Check Status'
+                        ]
+                     ]
+
+            handle = vfxSG.getShotgunHandle()
+            exportSettings = self.__configPanel.settings
+            contentsStringList = str()
+            contentsHTMLList = str()
+
+            exportTempName = exportSettings['exportName'] + "/"
+            exportDir = os.path.join(CONFIG_DATA['mrFilmOut']['settings']['default_write_location'], exportTempName)
+
+            contentsHTMLList = contentsHTMLList + "<b> Directory : {0} </b><br><br>".format(exportDir)
+
+            print(exportSettings['exportName'], [exportSettings['addressee']], exportSettings['deliveryMethod'])
+            deliveryEntity = vfxSG.createDeliveryEntity(exportSettings['exportName'], [exportSettings['addressee']], exportSettings['deliveryMethod'], handle)
+
+            self.progress = QtWidgets.QProgressDialog(self)
+            self.progress.setAutoClose(True)
+            self.progress.setMinimum(1)
+            self.progress.setWindowModality(QtCore.Qt.WindowModal)
+            self.progress.setWindowTitle("Packaging")
+            self.progress.show()
+
+            try:
+                os.mkdir(exportDir)
+            except FileExistsError:
+                pass
+
+            if self.__tabWidget.currentIndex() == 0:
+                self.__packageFromListSelection(contentsStringList, contentsHTMLList, exportTempName, handle, exportDir, deliveryEntity, output, exportSettings)
+            else:
+                self.__packageFromPlaylist(contentsStringList, contentsHTMLList, exportTempName, handle, exportDir, deliveryEntity, output, exportSettings)
+
+        else:
+            QtWidgets.QMessageBox().warning(self, "Wubbalubbadubdub \n Drive isn't mounted.", "Error! \n\n Drives isn't mounted.")
+
+    def __packageFromPlaylist(self, contentsStringList, contentsHTMLList, exportTempName, handle, exportDir, deliveryEntity, output, exportSettings):
+        self.progress.setMaximum(len(self.__playlistTree.selectedVersions))
+
+        for i, version in enumerate(self.__playlistTree.selectedVersions):
+
+            self.progress.setValue(i)
+            if version.pathToMov is not None:
+
+                htmlData = "<font color=\"green\">{0} -- Packaged</font><br>".format(version.name)
+                contentsStringList = contentsStringList + version.name + "\n"
+
+                contentsHTMLList = contentsHTMLList + htmlData
+
+                sequenceName = re.match("([A-Za-z][A-Za-z][A-Za-z]).+", version.name).groups()[0]
+
+                sequencePath = os.path.join(exportDir, sequenceName)
+
+                if os.path.exists(sequencePath) is False:
+                    os.mkdir(sequencePath)
+
+                if version.status is None:
+                    status = "Not Approved"
+                elif version.status != "2K Final":
+                    status = "Not Approved"
+                else:
+                    status = "2K Final"
+
+                shotObj = vfxSG.getShot(version.name.split("_")[0], handle)
+                output.append([exportTempName[:-1], shotObj.code, version.name, shotObj.vendorGroups[0]['name'], "0+0", status])
+
+                versionExportDir = "{0}{1}/{2}".format(exportDir, sequenceName, version.name)
+                versionRoot = os.path.split(version.pathToMov)[0].replace("mov", "")
+                systemUtils.packageVersion(versionRoot, versionExportDir)
+
+            else:
+                print("files missing", version.name)
+
+        handle.update("Delivery", deliveryEntity['id'], {'sg_contents': contentsStringList})
+
+        self.dumpExcel(exportTempName[:-1], output)
+
+        manifestHTML = "<br><font color=\"black\">Manifest File :: {0}</font><br>".format(os.path.join(CONFIG_DATA['mrFilmOut']['settings']['default_write_location'], exportTempName, "{0}.csv".format(exportTempName[:-1])))
+
+        contentsHTMLList = contentsHTMLList + manifestHTML
+
+        self.progress.close()
+
+        logFile = None
+
+        if exportSettings['deliveryMethod'] == "Dropbox":
+            progress = QtWidgets.QProgressDialog(self)
+            progress.setAutoClose(True)
+            progress.setMinimum(1)
+            progress.setWindowModality(QtCore.Qt.WindowModal)
+            progress.setWindowTitle("Packaging")
+            progress.show()
+            logFile = vfxDropbox.uploadDir(os.path.join(CONFIG_DATA['mrFilmOut']['settings']['default_write_location'], exportTempName), progressBarObj=progress)
+
+            dropboxLinkHTML = "<br><font color=\"black\"><a href=\"https://www.dropbox.com/home/To_OC/{0}\">Open in Dropbox</font><br><br><br>".format(exportTempName[:-1])
+
+            contentsHTMLList = contentsHTMLList + dropboxLinkHTML
+
+        elif exportSettings['deliveryMethod'] == "FTP":
+
+            pass
+
+        if logFile is not None:
+            utilsMail.sendMail(contentsHTMLList, "{0} :: MrFilmOut".format(exportSettings['exportName']), CONFIG_DATA['mrFilmOut']['settings']['email_recipients'])
+        else:
+            utilsMail.sendMail(contentsHTMLList, "{0} :: MrFilmOut".format(exportSettings['exportName']), CONFIG_DATA['mrFilmOut']['settings']['email_recipients'], attach=[logFile])
+
+        utilsPush.sendPushNotification("MrFilmOut - Export Complete :: {0}".format(exportSettings['exportName']), "MrFilmOut - Export Complete :: {0}".format(exportSettings['exportName']))
+
+        QtWidgets.QMessageBox().information(self, "Wubbalubbadubdub \n FilmOut Complete", "Wubbalubbadubdub! \n\n FilmOut Complete.")
+
+        self.forceClose = True
+        self.close()
+
+    def __packageFromListSelection(self, contentsStringList, contentsHTMLList, exportTempName, handle, exportDir, deliveryEntity, output, exportSettings):
+
+        self.progress.setMaximum(self.__selectedList.topLevelItemCount())
+
+        for i in range(self.__selectedList.topLevelItemCount()):
+            item = self.__selectedList.topLevelItem(i)
+
+            self.progress.setValue(i)
+            if item.versionObj.pathToMov is not None:
+
+                htmlData = "<font color=\"green\">{0} -- Packaged</font><br>".format(item.versionObj.name)
+                contentsStringList = contentsStringList + item.versionObj.name + "\n"
+
+                contentsHTMLList = contentsHTMLList + htmlData
+
+                versionRoot = os.path.split(item.versionObj.pathToMov)[0].replace("mov", "")
+                sequenceName = re.match("([A-Za-z][A-Za-z][A-Za-z]).+", item.versionObj.name).groups()[0]
+                sequencePath = os.path.join(exportDir, sequenceName)
+
+                if os.path.exists(sequencePath) is False:
+                    os.mkdir(sequencePath)
+
+                versionExportDir = "{0}{1}/{2}".format(exportDir, sequenceName, item.versionObj.name)
+                if item.versionObj.status is None:
+                    status = "Not Approved"
+                elif item.versionObj.status != "2K Final":
+                    status = "Not Approved"
+                else:
+                    status = "2K Final"
+
+                shotObj = vfxSG.getShot(item.versionObj.name.split("_")[0], handle)
+                output.append([exportTempName[:-1], shotObj.code, item.versionObj.name, shotObj.vendor['name'], shotObj.handles, status])
+
+                item.versionObj.setAttribute("sg_deliver_to_di", "dlvr")
+                item.versionObj.setAttribute("sg_deliver_to_di_", deliveryEntity)
+
+                try:
+                    shutil.copytree(versionRoot, versionExportDir)
+                    cdlExrs = os.path.join(versionExportDir, 'cdl_exr')
+                    if os.path.exists(cdlExrs):
+                        shutil.rmtree(cdlExrs)
+                except Exception:
+                    pass
+
+            else:
+                print("files missing", item.versionObj.name)
+
+        handle.update("Delivery", deliveryEntity['id'], {'sg_contents': contentsStringList})
+
+        self.dumpExcel(exportTempName[:-1], output)
+
+        htmlData = "<br><font color=\"black\">Manifest File :: {0}</font><br>".format(os.path.join(CONFIG_DATA['mrFilmOut']['settings']['default_write_location'], exportTempName, "{0}.xlsx".format(exportTempName[:-1])))
+        contentsHTMLList = contentsHTMLList + htmlData
+
+        self.progress.close()
+        utilsMail.sendMail(contentsHTMLList, "{0} :: MrFilmOut".format(exportSettings['exportName']), CONFIG_DATA['mrFilmOut']['settings']['email_recipients'])
+        utilsPush.sendPushNotification("MrFilmOut - Export Complete :: {0}".format(exportSettings['exportName']), "MrFilmOut - Export Complete :: {0}".format(exportSettings['exportName']))
+
+        QtWidgets.QMessageBox().information(self, "Wubbalubbadubdub \n FilmOut Complete", "Wubbalubbadubdub! \n\n FilmOut Complete.")
+
+        self.forceClose = True
+        self.close()
+
+    def __addVersion(self):
+        for version in self.__sequenceTree.selectedVersions():
+            newItem = VersionTreeItem(version.versionObj)
+            self.__selectedList.addTopLevelItem(newItem)
+
+    def __removeVersion(self):
+        for item in self.__selectedList.selectedItems():
+            self.__selectedList.takeTopLevelItem(self.__selectedList.indexOfTopLevelItem(item))
+
+    @QtCore.Slot()
+    def closeEvent(self, event):
+        if self.forceClose is False:
+            reply = QtWidgets.QMessageBox.question(self, 'Exit', 'Do you want to exit?')
+
+            if reply == QtWidgets.QMessageBox.Yes:
+                event.accept()
+            else:
+                event.ignore()
+
+    def dumpExcel(self, fileName, data):
+        excelHandle = os.path.join(CONFIG_DATA['mrFilmOut']['settings']['default_write_location'], fileName, "{0}.xlsx".format(fileName))
+
+        workbook = xlsxwriter.Workbook(excelHandle, {'remove_timezone': True})
+
+        worksheet = workbook.add_worksheet("Batch")
+        worksheet.set_column('A:A', 50)
+        worksheet.set_column('B:B', 20)
+        worksheet.set_column('C:D', 30)
+        worksheet.set_column('E:E', 40)
+        worksheet.set_column('F:F', 50)
+
+        cell_format = workbook.add_format({'bold': True, 'font_color': 'black', 'bg_color': '#9c9c9c', 'font_size': 14, 'font_name': 'Arial', 'text_wrap': True})
+        worksheet.write(0, 0, "Batch Name", cell_format)
+        worksheet.write(0, 1, "Shot", cell_format)
+        worksheet.write(0, 2, "Version Name Status", cell_format)
+        worksheet.write(0, 3, "Vendor", cell_format)
+        worksheet.write(0, 4, "Handles", cell_format)
+        worksheet.write(0, 5, "2K Tech Check Status", cell_format)
+
+        col = 0
+
+        for row, info in enumerate(data):
+            if row != 0:
+                cell_format = workbook.add_format({'bold': False, 'font_color': 'black', 'font_size': 14, 'font_name': 'Arial'})
+                worksheet.write(row, col, info[0], cell_format)
+                worksheet.write(row, col + 1, info[1], cell_format)
+                worksheet.write(row, col + 2, info[2], cell_format)
+                worksheet.write(row, col + 3, info[3], cell_format)
+                worksheet.write(row, col + 4, info[4], cell_format)
+                worksheet.write(row, col + 5, info[5], cell_format)
+
+        workbook.close()
+
+
+class ConfigPanel(QtWidgets.QGroupBox):
+
+    TITLE = "Output Options:"
+    DELIVERY_METHODS = ['FTP', 'Dropbox', 'Aspera', 'FedEx', 'Harddrive']
+    MAXIMUM_WIDTH = 350
+    BATCHES = [str(v + 1) for v in range(20)]
+
+    def __init__(self):
+        QtWidgets.QGroupBox.__init__(self)
+        self.__setupUi()
+        self.__populateWidgets()
+        self.__setupSignals()
+
+    def __setupUi(self):
+        mainWidget = QtWidgets.QWidget()
+        mainLayout = QtWidgets.QVBoxLayout()
+        mainWidget.setLayout(mainLayout)
+
+        outputNameSpacer = QtWidgets.QSpacerItem(0, 0, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+        outputNameLayout = QtWidgets.QHBoxLayout()
+        outputNameLabel = QtWidgets.QLabel("Batch Name:")
+        self.__outputNameTextField = QtWidgets.QLineEdit()
+
+        outputNameLayout.addItem(outputNameSpacer)
+        outputNameLayout.addWidget(outputNameLabel)
+        outputNameLayout.addWidget(self.__outputNameTextField)
+        self.__outputNameTextField.setEnabled(True)
+        self.__outputNameTextField.setMaximumWidth(self.MAXIMUM_WIDTH)
+
+        destinationLayout = QtWidgets.QHBoxLayout()
+        destinationSpacer = QtWidgets.QSpacerItem(0, 0, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+        destinationLabel = QtWidgets.QLabel("Destination:")
+
+        stripHandlesLayout = QtWidgets.QHBoxLayout()
+        self.__stripHandlesCheckBox = QtWidgets.QCheckBox("Strip Handles")
+        self.__stripHandlesCheckBox.setCheckState(QtCore.Qt.CheckState.Checked)
+
+        stripHandlesSpacer = QtWidgets.QSpacerItem(0, 0, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+        stripHandlesLayout.addItem(stripHandlesSpacer)
+        stripHandlesLayout.addWidget(self.__stripHandlesCheckBox)
+
+        doUploadLayout = QtWidgets.QHBoxLayout()
+        doUploadSpacer = QtWidgets.QSpacerItem(0, 0, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+        self.__doUploadCheckBox = QtWidgets.QCheckBox("Do Upload")
+        self.__doUploadCheckBox.setCheckState(QtCore.Qt.CheckState.Checked)
+
+        doUploadLayout.addItem(doUploadSpacer)
+        doUploadLayout.addWidget(self.__doUploadCheckBox)
+
+        self.__destinationCombo = QtWidgets.QComboBox()
+        self.__destinationCombo.setMaximumWidth(self.MAXIMUM_WIDTH)
+        self.__destinationCombo.setMinimumWidth(self.MAXIMUM_WIDTH)
+
+        destinationLayout.addItem(destinationSpacer)
+        destinationLayout.addWidget(destinationLabel)
+        destinationLayout.addWidget(self.__destinationCombo)
+
+        deliveryMethodSpacer = QtWidgets.QSpacerItem(0, 0, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+        deliveryMethodLayout = QtWidgets.QHBoxLayout()
+        deliveryMethodLabel = QtWidgets.QLabel("Delivery Method:")
+
+        self.__deliveryMethodComboBox = QtWidgets.QComboBox()
+        self.__deliveryMethodComboBox.setMaximumWidth(self.MAXIMUM_WIDTH)
+        self.__deliveryMethodComboBox.setMinimumWidth(self.MAXIMUM_WIDTH)
+
+        deliveryMethodLayout.addItem(deliveryMethodSpacer)
+        deliveryMethodLayout.addWidget(deliveryMethodLabel)
+        deliveryMethodLayout.addWidget(self.__deliveryMethodComboBox)
+
+        self.__datePicker = QtWidgets.QCalendarWidget()
+
+        self.__datePicker.setMaximumWidth(self.MAXIMUM_WIDTH)
+        self.__datePicker.setMinimumWidth(self.MAXIMUM_WIDTH)
+
+        calendarSpacer = QtWidgets.QSpacerItem(0, 0, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+
+        calendarLayout = QtWidgets.QHBoxLayout()
+        calendarLayout.addItem(calendarSpacer)
+        calendarLayout.addWidget(self.__datePicker)
+
+        self.__batchNumberSpinner = QtWidgets.QSpinBox()
+        self.__batchNumberSpinner.setMaximumWidth(self.MAXIMUM_WIDTH)
+        self.__batchNumberSpinner.setMinimumWidth(self.MAXIMUM_WIDTH)
+
+        batchSpacer = QtWidgets.QSpacerItem(0, 0, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+        batchLayout = QtWidgets.QHBoxLayout()
+        batchLabel = QtWidgets.QLabel("Batch #:")
+
+        batchLayout.addItem(batchSpacer)
+        batchLayout.addWidget(batchLabel)
+
+        batchLayout.addWidget(self.__batchNumberSpinner)
+
+        self.__doPackageButton = QtWidgets.QPushButton("Run FilmOut")
+        self.__doPackageButton.setEnabled(False)
+
+        mainLayout.addLayout(outputNameLayout)
+        mainLayout.addLayout(destinationLayout)
+        mainLayout.addLayout(deliveryMethodLayout)
+        mainLayout.addLayout(stripHandlesLayout)
+        mainLayout.addLayout(batchLayout)
+        mainLayout.addLayout(doUploadLayout)
+
+        mainLayout.addLayout(calendarLayout)
+        self.setLayout(mainLayout)
+
+    def __populateWidgets(self):
+        handle = vfxSG.getShotgunHandle()
+        currentDeliveryIndex = vfxSG.getAllDeliveries(handle)
+        self.__batchNumberSpinner.setValue(currentDeliveryIndex)
+
+        destinations = [destination['name'] for destination in CONFIG_DATA['mrFilmOut']['settings']['delivery_destinations']]
+        self.__destinationCombo.addItems(destinations)
+
+        self.__deliveryMethodComboBox.addItems(self.DELIVERY_METHODS)
+        self.updateBatchName()
+
+    def updateBatchName(self):
+
+        dateString = self.__datePicker.selectedDate().toString("yyyyMMdd")
+        exportTempName = "{0}_Batch_{1}_DI_Delivery".format(dateString, self.__batchNumberSpinner.value())
+
+        if os.path.exists(os.path.join(CONFIG_DATA['mrFilmOut']['settings']['default_write_location'], exportTempName)):
+            exportTempName = "{0}a_Batch_{1}_DI_Delivery".format(dateString, self.__batchNumberSpinner.text())
+
+        if os.path.exists(os.path.join(CONFIG_DATA['mrFilmOut']['settings']['default_write_location'], exportTempName)):
+            exportTempName = "{0}b_Batch_{1}_DI_Delivery".format(dateString, self.__batchNumberSpinner.text())
+
+        if os.path.exists(os.path.join(CONFIG_DATA['mrFilmOut']['settings']['default_write_location'], exportTempName)):
+            exportTempName = "{0}c_Batch_{1}_DI_Delivery".format(dateString, self.__batchNumberSpinner.text())
+
+        self.__outputNameTextField.setText(exportTempName)
+
+    def __setupSignals(self):
+        self.__datePicker.selectionChanged.connect(self.updateBatchName)
+        self.__batchNumberSpinner.valueChanged.connect(self.__batchNumberChanged)
+
+    def __batchNumberChanged(self, batchNumber):
+        self.updateBatchName()
+
+    @property
+    def settings(self):
+
+        for dest in CONFIG_DATA['mrFilmOut']['settings']['delivery_destinations']:
+            if dest['name'] == self.__destinationCombo.currentText():
+                destDict = dest
+
+        settings = {}
+        settings['date'] = self.__datePicker.selectedDate()
+        settings['batch'] = str(self.__batchNumberSpinner.value())
+        settings['deliveryMethod'] = str(self.__deliveryMethodComboBox.currentText())
+        settings['exportName'] = str(self.__outputNameTextField.text())
+        settings['addressee'] = destDict
+        settings['doUpload'] = self.__doUploadCheckBox.checkState()
+        return settings
+
+
+class FilterPanel(QtWidgets.QHBoxLayout):
+
+    STATUS = ['Client Final Pending 2K Check']
+    sequenceChanged = QtCore.Signal(str)
+
+    def __init__(self):
+        QtWidgets.QHBoxLayout.__init__(self)
+        self.__setup()
+        self.__populateWidgets()
+
+    def __setup(self):
+        self.__searchVersionLineEdit = QtWidgets.QLineEdit()
+
+        self.__searchVersionLineEdit.setPlaceholderText("Search Versions..")
+
+        sequenceLabel = QtWidgets.QLabel("Sequence:")
+        self.__loadButton = QtWidgets.QPushButton("Load")
+        self.__sequenceCombo = QtWidgets.QComboBox()
+        self.__statusCombo = QtWidgets.QComboBox()
+        self.__statusCombo.addItems(self.STATUS)
+
+        self.__techCheckApprovedCheckbox = QtWidgets.QCheckBox("2k Final")
+        self.__tempOneSelectedCheckbox = QtWidgets.QCheckBox("Temp #1")
+        self.__tempTwoSelectedCheckbox = QtWidgets.QCheckBox("Temp #2")
+
+        self.__techCheckApprovedCheckbox.setCheckState(QtCore.Qt.CheckState.Checked)
+        self.__tempOneSelectedCheckbox.setCheckState(QtCore.Qt.CheckState.Checked)
+        self.__tempTwoSelectedCheckbox.setCheckState(QtCore.Qt.CheckState.Checked)
+
+        self.__sequenceCombo = QtWidgets.QComboBox()
+
+        spacer = QtWidgets.QSpacerItem(0, 0,
+                                       QtWidgets.QSizePolicy.Expanding,
+                                       QtWidgets.QSizePolicy.Fixed)
+
+        self.addWidget(sequenceLabel)
+        self.addWidget(self.__sequenceCombo)
+        self.addWidget(self.__statusCombo)
+
+        self.addWidget(self.__searchVersionLineEdit)
+
+        self.addItem(spacer)
+
+        self.addWidget(self.__loadButton)
+
+    def switchReloadButton(self, state):
+        if state == 0:
+            self.__loadButton.setText("Load")
+            self.__loadButton.setIcon(QtGui.QIcon())
+        else:
+            self.__loadButton.setText("")
+            self.__loadButton.setIcon(QtGui.QIcon(REFRESH_ICON))
+
+    @property
+    def loadButton(self):
+        return self.__loadButton
+
+    @property
+    def sequenceCombo(self):
+        return self.__sequenceCombo
+
+    def __populateWidgets(self):
+        for seq in vfxSG.getSequences():
+            self.__sequenceCombo.addItem(seq.code)
+
+    @property
+    def settings(self):
+        settings = {}
+        settings['2kCheckApproved'] = bool(self.__techCheckApprovedCheckbox.checkState())
+        settings['tempOne'] = bool(self.__tempOneSelectedCheckbox.checkState())
+        settings['tempTwo'] = bool(self.__tempTwoSelectedCheckbox.checkState())
+
+        return settings
+
+    @property
+    def searchLineEdit(self):
+        return self.__searchVersionLineEdit
+
+
+class SequenceTree(QtWidgets.QTreeWidget):
+
+    HEADERS = ["Shot/Version", "Version Status", "Package Status"]
+
+    def __init__(self):
+        QtWidgets.QTreeWidget.__init__(self)
+        self.__sequenceName = None
+        self.__filters = \
+            [
+                ["sg_temp_delivery_1", "is", True],
+                ["sg_temp_delivery_2", "is", True],
+                ["sg_status_list", "is", "2kfin"]
+            ]
+
+        self.__itemStack = []
+        self.__setup()
+
+    @property
+    def filters(self):
+        return self.__filters
+
+    @filters.setter
+    def filters(self, filtersIn):
+        self.__filters = filtersIn
+
+    @property
+    def sequence(self):
+        return self.__sequenceName
+
+    @sequence.setter
+    def sequence(self, sequenceIn):
+        self.__sequenceName = sequenceIn
+
+    def __setup(self):
+        self.setHeaderLabels(self.HEADERS)
+        self.setSelectionMode(QtWidgets.QAbstractItemView.ContiguousSelection)
+
+    def __openProgressDialog(self):
+        self.progress = QtWidgets.QProgressDialog(self)
+        self.progress.setAutoClose(True)
+        self.progress.setMinimum(1)
+        self.progress.setWindowModality(QtCore.Qt.WindowModal)
+        self.progress.setWindowTitle("Exporting")
+        self.progress.show()
+
+    def __populateWidget(self, settings):
+        self.clear()
+        self.__openProgressDialog()
+        sg = vfxSG.getShotgunHandle()
+        filters = {
+            "filter_operator": "all",
+            "filters": [
+                ["sg_status_list", "is", "pndg2k"],
+                ['sg_sequence.Sequence.code', 'is', self.__sequenceName]
+            ]
+         }
+
+        shots = vfxSG.getShotsByAttr(filters, sg)
+        self.progress.setMaximum(len(shots))
+        for i, shot in enumerate(shots):
+            for version in shot.getVersions():
+                if version.status == "2k Tech Check Pending" \
+                   or version.status == "2K Final" \
+                   or version.status == "Creative Approved":
+
+                    versionItem = VersionTreeItem(version)
+                    self.__itemStack.append(versionItem)
+                    self.addTopLevelItem(versionItem)
+
+            self.progress.setValue(i)
+
+        for i in range(len(self.HEADERS)):
+            self.resizeColumnToContents(i)
+
+        self.progress.close()
+
+    def selectedVersions(self):
+        versions = []
+        for item in self.selectedItems():
+            if isinstance(item, VersionTreeItem):
+                versions.append(item)
+
+        return versions
+
+    def getSelectedItems(self):
+        items = []
+        for item in self.__itemStack:
+            if item.checkState(0):
+                items.append(item)
+
+        return items
+
+    def refresh(self, filters):
+        self.__itemStack = []
+        self.__populateWidget(filters)
+
+    def doSearch(self, searchTerm):
+        foundItems = self.findItems(searchTerm,  QtCore.Qt.MatchContains, 0)
+
+        for item in self.__itemStack:
+            found = False
+            for foundItem in foundItems:
+                if foundItem.text(0) == item.text(0):
+                    found = True
+            if found:
+                item.setHidden(False)
+            else:
+                item.setHidden(True)
+
+
+class VersionTreeItem(QtWidgets.QTreeWidgetItem):
+
+    def __init__(self, versionObj):
+        QtWidgets.QTreeWidgetItem.__init__(self)
+        self.__versionObj = versionObj
+        self.__setup()
+
+    def __setup(self):
+        self.setText(0, self.__versionObj.name)
+
+        self.setText(1, self.__versionObj.status)
+
+        if self.__versionObj.info['sg_deliver_to_di'] is None:
+            self.setText(2, "Unpackaged")
+
+        elif self.__versionObj.info['sg_deliver_to_di'] == "wtg":
+            self.setText(2, "Waiting to go")
+
+        elif self.__versionObj.info['sg_deliver_to_di'] == "dlvr":
+            self.setText(2, "Delivered")
+
+    @property
+    def versionObj(self):
+        return self.__versionObj
+
+
+class SelectedListList(QtWidgets.QTreeWidget):
+
+    HEADERS = ["Version Name"]
+
+    def __init__(self):
+        QtWidgets.QTreeWidget.__init__(self)
+        self.__setup()
+
+    def __setup(self):
+        self.setHeaderLabels(self.HEADERS)
+
+
+class PlaylistTree(QtWidgets.QTreeWidget):
+
+    HEADERS = ["Selected", "Name", "Packaged Status"]
+
+    def __init__(self):
+        QtWidgets.QTreeWidget.__init__(self)
+        self.__playlistStack = []
+        self.__unfoldLimit = 100
+        self.__setup()
+        self.__populateWidget()
+        self.__setupSignals()
+
+    def __setupSignals(self):
+        self.itemChanged.connect(self.__itemChanged)
+
+    def __itemChanged(self, itemChanged, column):
+        if itemChanged.topItem:
+            for i in range(itemChanged.childCount()):
+                childItem = itemChanged.child(i)
+                childItem.setCheckState(0, itemChanged.checkState(0))
+        else:
+            pass
+
+    def __setup(self):
+        self.setHeaderLabels(self.HEADERS)
+
+    def refresh(self):
+        self.__populateWidget()
+
+    def __populateWidget(self):
+        self.clear()
+        self.__playlistStack = []
+        sgHandle = vfxSG.getShotgunHandle()
+        playlists = vfxSG.getPlaylists(sgHandle)
+
+        for i, playlist in enumerate(playlists):
+
+            if i < PLAYLIST_LIMIT:
+
+                item = QtWidgets.QTreeWidgetItem()
+                item.topItem = True
+                item.setCheckState(0, QtCore.Qt.CheckState.Unchecked)
+                item.setText(1, playlist.name)
+                item.playlistDict = playlist
+
+                self.__playlistStack.append(item)
+
+                self.addTopLevelItem(item)
+
+                if i < self.__unfoldLimit:
+                    versions = playlist.getVersions()
+                    for version in versions:
+                        subVersion = QtWidgets.QTreeWidgetItem()
+                        subVersion.setText(1, version.name)
+                        subVersion.version = version
+
+                        subVersion.topItem = False
+                        item.addChild(subVersion)
+
+        for i in range(len(self.HEADERS)):
+            self.resizeColumnToContents(i)
+
+    @property
+    def unfoldLimit(self):
+        return self.__unfoldLimit
+
+    @unfoldLimit.setter
+    def unfoldLimit(self, unfoldLimitIn):
+        self.__unfoldLimit = unfoldLimitIn
+
+    @property
+    def selectedPlaylists(self):
+        lists = []
+        for playlist in self.__playlistStack:
+            if playlist.checkState(0):
+                lists.append(playlist)
+        return lists
+
+    @property
+    def selectedVersions(self):
+        versions = []
+        for i in range(self.topLevelItemCount()):
+            topItem = self.topLevelItem(i)
+            for i in range(topItem.childCount()):
+                childItem = topItem.child(i)
+                if childItem.checkState(0) == QtCore.Qt.CheckState.Checked:
+                    versions.append(childItem.version)
+
+        return versions
+
+
+def run():
+    app = QtWidgets.QApplication(sys.argv)
+    ui = MrFilmOutUi()
+    qtmodern.styles.dark(app)
+    mw = qtmodern.windows.ModernWindow(ui)
+    mw.show()
+    sys.exit(app.exec_())
+
+
+if __name__ == "__main__":
+    run()

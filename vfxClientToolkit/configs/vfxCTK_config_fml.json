@@ -1,0 +1,13 @@
+{
+    "fml": {
+        "settings": {
+            "rv": ""
+        }, 
+        "metadata": {
+            "enabled": true, 
+            "name": "FML", 
+            "file": "vfxCTK_config_fml", 
+            "description": "etc"
+        }
+    }
+}

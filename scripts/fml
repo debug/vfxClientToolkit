@@ -1,0 +1,69 @@
+#!/usr/local/bin/python3
+
+import os
+import argparse
+
+import re
+
+from pathlib import Path
+
+PARSER = argparse.ArgumentParser()
+PARSER.add_argument("dept", nargs="+")
+PARSER.add_argument("-shot", nargs="+")
+
+import vfxClientToolkit.api.config as vfxConfig
+
+CONFIG_DATA = vfxConfig.getBundles()
+
+
+ROOT = os.path.join(CONFIG_DATA["filesystem"]["settings"]["project_tree_root"], "{project}/{seq}/{shot}/img/")
+RV = CONFIG_DATA["filesystem"]["settings"]['rv']
+
+def findLatestDept(seq, shot, dept):
+    subDirs = []
+    dirDict = {}
+    shotRoot = Path(ROOT.format(seq=seq.lower(), shot=shot.upper()))
+    for item in shotRoot.iterdir():
+        #print(item.stem)
+        if item.stem != ".DS_Store":
+            if item.is_dir():
+                for subDir in item.iterdir():
+                    subDirs.append(str(subDir.stem))
+                    dirDict[subDir.stem] = subDir.absolute()
+    subDirs.sort(key=natural_keys)
+
+    
+    subDirs.reverse()
+    for dir in subDirs:
+        if dept == "any":
+            return dirDict[dir]
+        if re.match(".+{0}.+".format(dept), dir) != None:
+            return dirDict[dir]
+
+def atoi(text):
+    return int(text) if text.isdigit() else text
+
+def natural_keys(text):
+    return [ atoi(c) for c in re.split(".+v[0-9][0-9][0-9]", text) ]
+
+def playRVMedia(filePaths):
+    fileString = str()
+    os.system("{0} {1}".format(RV, fileString))
+
+if __name__ == "__main__":
+    movs = str()
+    args = PARSER.parse_args()
+
+    for shot in args.shot:
+
+        matchObj = re.match("([a-z][a-z][a-z]).+", shot)
+        if matchObj != None:
+            versionDir = findLatestDept(matchObj.groups()[0], shot, args.dept[0])
+            print(versionDir)
+            movDir = Path(versionDir) / "mov"
+            for mov in movDir.glob("*.mov"):
+
+                movs = movs + " " + str(mov.absolute())
+
+    os.system("unset PYTHONPATH; {0} {1}".format(RV, movs))
+

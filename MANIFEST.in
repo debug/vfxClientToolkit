@@ -1,0 +1,3 @@
+include vfxClientToolkit/icons/*
+include vfxClientToolkit/configs/*
+include vfxClientToolkit/html_templates/*
