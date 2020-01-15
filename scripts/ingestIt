@@ -1,4 +1,5 @@
-#! /usr/local/bin/python3
+#!/usr/bin/env python
+
 import os
 import sys
 import re
@@ -6,7 +7,7 @@ from pathlib import Path
 import json
 from enum import Enum
 
-from PySide2 import QtGui, QtWidgets, QtCore
+from qtpy import QtGui, QtWidgets, QtCore
 
 import qtmodern.styles
 import qtmodern.windows

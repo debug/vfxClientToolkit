@@ -1,4 +1,4 @@
-from PySide2 import QtGui
+from qtpy import QtGui
 
 def centerWidget(parent):
     frame = parent.frameGeometry()

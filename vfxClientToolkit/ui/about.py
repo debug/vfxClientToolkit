@@ -1,4 +1,4 @@
-from PySide2.QtWidgets import QMessageBox
+from qtpy.QtWidgets import QMessageBox
 
 #QMessageBox.about(self, "About PySide, Platform and version.",
 #"""<b> about.py version %s </b>
