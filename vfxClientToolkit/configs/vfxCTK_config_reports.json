@@ -1,15 +1,19 @@
 {
     "reports": {
-        "settings": {
-            "recipients": [
-                "dom@reality-debug.co.uk"
-            ]
-        }, 
         "metadata": {
+            "callback": null, 
             "enabled": true, 
             "name": "Reports", 
             "file": "vfxCTK_config_reports", 
             "description": "etc"
+        }, 
+        "settings": {
+            "recipients": {
+                "data_type": "list", 
+                "callback": null, 
+                "tooltip": "misc", 
+                "value": null
+            }
         }
     }
 }

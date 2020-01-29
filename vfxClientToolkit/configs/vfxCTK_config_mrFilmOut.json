@@ -1,28 +1,50 @@
 {
     "mrFilmOut": {
-        "settings": {
-            "dropbox": {
-                "access_token": "", 
-                "namespace_id": ""
-            }, 
-            "dropbox_root_prefix": "to_DI", 
-            "default_write_location": "", 
-            "email_recipients": [
-                ""
-            ], 
-            "delivery_destinations": [
-                {
-                    "type": "Group", 
-                    "id": 16, 
-                    "name": "DI_House"
-                }
-            ]
-        }, 
         "metadata": {
+            "callback": null, 
             "enabled": true, 
             "name": "MrFilmOut", 
             "file": "vfxCTK_config_mrFilmOut", 
             "description": "etc"
+        }, 
+        "settings": {
+            "delivery_destinations": {
+                "data_type": "list_entities", 
+                "callback": null, 
+                "type": "Group", 
+                "tooltip": "misc", 
+                "value": {
+                    "id": null, 
+                    "name": null
+                }
+            }, 
+            "dropbox": {
+                "data_type": "dict", 
+                "callback": null, 
+                "tooltip": "misc", 
+                "value": {
+                    "access_token": null, 
+                    "namespace_id": null
+                }
+            }, 
+            "dropbox_root_prefix": {
+                "data_type": "string", 
+                "callback": null, 
+                "tooltip": "misc", 
+                "value": null
+            }, 
+            "default_write_location": {
+                "data_type": "path", 
+                "callback": null, 
+                "tooltip": "misc", 
+                "value": null
+            }, 
+            "email_recipients": {
+                "data_type": "list", 
+                "callback": null, 
+                "tooltip": "misc", 
+                "value": null
+            }
         }
     }
 }

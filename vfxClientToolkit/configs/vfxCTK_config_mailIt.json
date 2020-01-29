@@ -1,24 +1,35 @@
 {
     "mailIt": {
+        "settings": {
+            "sequence_whitelist": {
+                "data_type": "list", 
+                "callback": null, 
+                "tooltip": "misc", 
+                "value": null
+            }, 
+            "recipients_by_vendor": {
+                "data_type": "dict", 
+                "callback": null, 
+                "type": "Group", 
+                "tooltip": "misc", 
+                "value": {
+                    "vendor": null, 
+                    "name": null
+                }
+            }, 
+            "recipients": {
+                "data_type": "list", 
+                "callback": null, 
+                "tooltip": "misc", 
+                "value": null
+            }
+        }, 
         "metadata": {
+            "callback": null, 
             "enabled": true, 
             "name": "Mail It", 
             "file": "vfxCTK_config_mailIt", 
             "description": "etc"
-        }, 
-        "settings": {
-            "rv": "", 
-            "sequence_whitelist": [
-                ""
-            ], 
-            "recipients_by_vendor": {
-                "Digital Domain": [
-                    "dom@reality-debug.co.uk"
-                ]
-            }, 
-            "recipients": [
-                "dom@reality-debug.co.uk"
-            ]
         }
     }
 }

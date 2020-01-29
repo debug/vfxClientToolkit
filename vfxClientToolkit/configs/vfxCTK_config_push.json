@@ -1,14 +1,25 @@
 {
     "push": {
-        "settings": {
-            "token": "", 
-            "user": ""
-        }, 
         "metadata": {
+            "callback": null, 
             "enabled": true, 
             "name": "Push Notifications", 
             "file": "vfxCTK_config_push", 
             "description": "etc"
+        }, 
+        "settings": {
+            "token": {
+                "data_type": "string", 
+                "callback": null, 
+                "tooltip": "misc", 
+                "value": null
+            }, 
+            "user": {
+                "data_type": "string", 
+                "callback": null, 
+                "tooltip": "misc", 
+                "value": null
+            }
         }
     }
 }

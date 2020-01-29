@@ -1,16 +1,37 @@
 {
     "email": {
-        "settings": {
-            "username": "", 
-            "password": "", 
-            "smtp": "", 
-            "port": ""
-        }, 
         "metadata": {
+            "callback": null, 
             "enabled": true, 
             "name": "Email", 
             "file": "vfxCTK_config_email", 
             "description": "etc"
+        }, 
+        "settings": {
+            "username": {
+                "data_type": "string", 
+                "callback": null, 
+                "tooltip": "misc", 
+                "value": null
+            }, 
+            "password": {
+                "data_type": "string", 
+                "callback": null, 
+                "tooltip": "misc", 
+                "value": null
+            }, 
+            "smtp": {
+                "data_type": "string", 
+                "callback": null, 
+                "tooltip": "misc", 
+                "value": null
+            }, 
+            "port": {
+                "data_type": "int", 
+                "callback": null, 
+                "tooltip": "misc", 
+                "value": null
+            }
         }
     }
 }

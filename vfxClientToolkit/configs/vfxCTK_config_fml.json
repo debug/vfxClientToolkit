@@ -1,13 +1,19 @@
 {
     "fml": {
-        "settings": {
-            "rv": ""
-        }, 
         "metadata": {
+            "callback": null, 
             "enabled": true, 
             "name": "FML", 
             "file": "vfxCTK_config_fml", 
             "description": "etc"
+        }, 
+        "settings": {
+            "rv": {
+                "data_type": "path", 
+                "callback": null, 
+                "tooltip": "misc", 
+                "value": null
+            }
         }
     }
 }

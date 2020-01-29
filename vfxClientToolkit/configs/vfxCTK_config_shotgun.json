@@ -1,35 +1,44 @@
 {
-    "shotgun": {
-        "settings": {
-            "shot_status_mapping": {
-                "cbb": "CBB", 
-                "pndg2k": "Client Final Pending 2K Check", 
-                "2kfin": "2K Final", 
-                "aniapr": "Animation Approved", 
-                "anipc": "Animation Pending Continuity", 
-                "ip": "In Progress", 
-                "dante": "Creative Approved", 
-                "laypc": "Layout Pending Continuity", 
-                "wtg": "Waiting To Start", 
-                "layapr": "Layout Approved"
-            }, 
-            "project_name": "", 
-            "version_status_mapping": {
-                "2ktcpd": "2k Tech Check Pending", 
-                "vwd": "Viewed", 
-                "dirapr": "Director Approved", 
-                "pddr": "Pending Director Review", 
-                "kicbk": "Kick Back"
-            }, 
-            "script_name": "", 
-            "server": "", 
-            "api_key": ""
+    "api_key": {
+        "data_type": "string", 
+        "callback": null, 
+        "tooltip": "misc", 
+        "value": null
+    }, 
+    "project_name": {
+        "data_type": "string", 
+        "callback": null, 
+        "tooltip": "misc", 
+        "value": null
+    }, 
+    "script_name": {
+        "data_type": "string", 
+        "callback": null, 
+        "tooltip": "misc", 
+        "value": null
+    }, 
+    "server": {
+        "data_type": "string", 
+        "callback": null, 
+        "tooltip": "misc", 
+        "value": null
+    }, 
+    "shot_status_mapping": {
+        "data_type": "list", 
+        "callback": {
+            "func": "moo.moo", 
+            "label": "Populate from Shotgun"
         }, 
-        "metadata": {
-            "enabled": true, 
-            "name": "Shotgun", 
-            "file": "vfxCTK_config_shotgun", 
-            "description": "etc"
-        }
+        "tooltip": "misc", 
+        "value": null
+    }, 
+    "version_status_mapping": {
+        "data_type": "list", 
+        "callback": {
+            "func": "moo.moo", 
+            "label": "Populate from Shotgun"
+        }, 
+        "tooltip": "misc", 
+        "value": null
     }
 }
