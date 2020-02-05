@@ -13,6 +13,7 @@ def read(fname):
 
 requirements = [
     'requests',
+    'progress',
     'gspread',
     'requests',
     'pillow',

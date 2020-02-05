@@ -26,7 +26,7 @@ PLAYLIST_LIMIT = 45
 CONFIG_DATA = vfxConfig.getBundles()
 
 SEQUENCE_WHITELIST = CONFIG_DATA['mailIt']['settings']['sequence_whitelist']
-SHOT_STATUS_MAPPING = CONFIG_DATA['shotgun']['settings']['shot_status_mapping']
+SHOT_STATUS_MAPPING = vfxSG.schemaRead("Shot", "sg_status_list")
 RECIPIENTS_BY_VENDOR = CONFIG_DATA['mailIt']['settings']['recipients_by_vendor']
 
 def getRecipentsByVendor(vendor):
@@ -109,7 +109,6 @@ def run():
 
 if __name__ == "__main__":
     results = run()
-    #msg, subject, recipients = run()
     if results == []:
         pass
     else:

@@ -1,44 +1,46 @@
 {
-    "api_key": {
-        "data_type": "string", 
-        "callback": null, 
-        "tooltip": "misc", 
-        "value": null
-    }, 
-    "project_name": {
-        "data_type": "string", 
-        "callback": null, 
-        "tooltip": "misc", 
-        "value": null
-    }, 
-    "script_name": {
-        "data_type": "string", 
-        "callback": null, 
-        "tooltip": "misc", 
-        "value": null
-    }, 
-    "server": {
-        "data_type": "string", 
-        "callback": null, 
-        "tooltip": "misc", 
-        "value": null
-    }, 
-    "shot_status_mapping": {
-        "data_type": "list", 
-        "callback": {
-            "func": "moo.moo", 
-            "label": "Populate from Shotgun"
+    "shotgun": {
+        "settings": {
+            "project_name": {
+                "pretty_name": "Project Name", 
+                "value": null, 
+                "tooltip": "Project name as specified in Shotgun", 
+                "data_type": "string", 
+                "callback": null
+            }, 
+            "script_name": {
+                "pretty_name": "Script Name", 
+                "value": null, 
+                "tooltip": "Name of Shotgun script", 
+                "data_type": "string", 
+                "callback": null
+            }, 
+            "server": {
+                "pretty_name": "Server", 
+                "value": null, 
+                "tooltip": "Server address", 
+                "data_type": "string", 
+                "callback": null
+            }, 
+            "api_key": {
+                "pretty_name": "API Key", 
+                "value": null, 
+                "tooltip": "Shotgun API Token", 
+                "data_type": "string", 
+                "callback": null
+            }
         }, 
-        "tooltip": "misc", 
-        "value": null
-    }, 
-    "version_status_mapping": {
-        "data_type": "list", 
-        "callback": {
-            "func": "moo.moo", 
-            "label": "Populate from Shotgun"
-        }, 
-        "tooltip": "misc", 
-        "value": null
+        "metadata": {
+            "name": "Shotgun", 
+            "enabled": true, 
+            "callback": {
+                "func": "testConnection", 
+                "module": "vfxClientToolkit.configs.utils.shotgun", 
+                "label": "Test Connection"
+            }, 
+            "file": "vfxCTK_config_shotgun", 
+            "help_url": "https://debug.github.io/vfxClientToolkit/html/index.html", 
+            "description": "etc"
+        }
     }
 }

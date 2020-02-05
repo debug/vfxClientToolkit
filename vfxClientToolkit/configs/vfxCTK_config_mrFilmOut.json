@@ -5,21 +5,13 @@
             "enabled": true, 
             "name": "MrFilmOut", 
             "file": "vfxCTK_config_mrFilmOut", 
+            "help_url": "https://debug.github.io/vfxClientToolkit/html/index.html",
             "description": "etc"
         }, 
         "settings": {
-            "delivery_destinations": {
-                "data_type": "list_entities", 
-                "callback": null, 
-                "type": "Group", 
-                "tooltip": "misc", 
-                "value": {
-                    "id": null, 
-                    "name": null
-                }
-            }, 
             "dropbox": {
                 "data_type": "dict", 
+                "pretty_name": "Dropbox Credentials", 
                 "callback": null, 
                 "tooltip": "misc", 
                 "value": {
@@ -28,18 +20,25 @@
                 }
             }, 
             "dropbox_root_prefix": {
+                "pretty_name": "Dropbox Root", 
                 "data_type": "string", 
                 "callback": null, 
                 "tooltip": "misc", 
                 "value": null
             }, 
             "default_write_location": {
+                "pretty_name": "Default Filmout Path", 
                 "data_type": "path", 
-                "callback": null, 
+                "callback": {
+                "func": "browseForFileRoot", 
+                "module": "vfxClientToolkit.configs.utils.filesystem", 
+                "label": "Browse"
+                }, 
                 "tooltip": "misc", 
                 "value": null
             }, 
             "email_recipients": {
+                "pretty_name": "Email Recipients", 
                 "data_type": "list", 
                 "callback": null, 
                 "tooltip": "misc", 

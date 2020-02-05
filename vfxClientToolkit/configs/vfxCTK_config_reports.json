@@ -5,14 +5,17 @@
             "enabled": true, 
             "name": "Reports", 
             "file": "vfxCTK_config_reports", 
-            "description": "etc"
+            "description": "etc",
+            "pretty_name": "Report Generator", 
+            "help_url": "https://debug.github.io/vfxClientToolkit/html/index.html"
         }, 
         "settings": {
             "recipients": {
                 "data_type": "list", 
                 "callback": null, 
-                "tooltip": "misc", 
-                "value": null
+                "tooltip": "Recipients for the generated report", 
+                "value": null,
+                "pretty_name": "Email recipients"
             }
         }
     }

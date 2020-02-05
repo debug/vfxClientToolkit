@@ -63,43 +63,6 @@ def getProject():
     return sg_project
 
 
-#def getVersionsFromPlaylist(playlistInfo, sg):
-#    """
-#    Returns all versions from a specified playlist.
-#
-#    Args:
-#        param1 (dict.Shotgun): Dict containing Shotgun ID for playlist entity.
-#        param2 (shotgun_api3.Shotgun): Shotgun DB Object.
-#
-#    Returns:
-#        list: List of `vfxClientToolkit.api.entities.Version` objects.
-#
-#    """
-#    sgHandle = getShotgunHandle()
-#    filters = [
-#        ['name', 'is', CONFIG_DATA['shotgun']['settings']['project_name']]
-#    ]
-#    fields = ['id', 'name']
-#    sgProject = sg.find_one("Project", [['name', 'is', CONFIG_DATA['shotgun']['settings']['project_name']]])
-#
-#    linked_shot = { 'type' : 'Playlist' , 'id' : playlistInfo['id']}
-#
-#    version_filters = [
-#                      ['project','is',{'type':'Project','id': sgProject['id']}],
-#                      ['playlists', 'is', linked_shot ]
-#                      ]
-#
-#    linked_versions = sg.find('Version', version_filters,['id', 'code', 'type', 'open_notes', 'sg_status_list', 'entity', 'sg_path_to_movie'])
-#
-#    versionObjs = []
-#
-#    for version in linked_versions:
-#        versionObj = vfxEntities.Version(version, sg)
-#        versionObjs.append(versionObj)
-#
-#    return versionObjs
-
-
 def getSequences():
     """
     Collects and returns all sequences from the configured Shotgun projet.
@@ -360,6 +323,51 @@ def getAllDeliveries(sg):
     else:
         return indices[0]
 
+def schemaRead(entityType, fieldName):
+    """
+    Returns all delivery entities in Shotgun.
+
+    Args:
+        param1 (shotgun_api3.shotgun.Shotgun): Shotgun handle.
+
+    Returns:
+        dict: Shotgun dictionary with entity info.
+
+    """
+    sgHandle = getShotgunHandle()
+    schema = sgHandle.schema_field_read(entityType, fieldName)
+    values = schema['sg_status_list']['properties']['display_values']['value']
+
+    return values
+
+def getVendors():
+    """
+    Returns all delivery entities in Shotgun.
+
+    Args:
+        param1 (shotgun_api3.shotgun.Shotgun): Shotgun handle.
+
+    Returns:
+        dict: Shotgun dictionary with entity info.
+
+    """
+
+    sgHandle = getShotgunHandle()
+    fields = ['id', 'name', "permission_rule_set", "firstname", "lastname", "tags"]
+
+    filters = [
+        ["permission_rule_set", "is", {'id': 13, 'name': 'Vendor', 'type': 'PermissionRuleSet'}]
+    ]
+
+    vendors = sgHandle.find("HumanUser", filters, fields)
+
+    vendorObjs = []
+
+    for vendor in vendors:
+        vendorObjs.append(vfxEntities.Vendor(vendor, sgHandle))
+
+    return vendorObjs
 
 if __name__ == "__main__":
+    print(getVendors()[3].info)
     pass

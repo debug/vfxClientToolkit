@@ -2,14 +2,20 @@
     "mailIt": {
         "settings": {
             "sequence_whitelist": {
+                "pretty_name": "Sequence(s) Whitelist", 
                 "data_type": "list", 
                 "callback": null, 
                 "tooltip": "misc", 
                 "value": null
             }, 
             "recipients_by_vendor": {
-                "data_type": "dict", 
-                "callback": null, 
+                "pretty_name": "Recipients per vendor", 
+                "callback": {
+                "func": "launchRecipientsByVendorUI", 
+                "module": "vfxClientToolkit.configs.utils.mailIt", 
+                "label": "Configure"
+                },
+                "data_type": "custom", 
                 "type": "Group", 
                 "tooltip": "misc", 
                 "value": {
@@ -18,6 +24,7 @@
                 }
             }, 
             "recipients": {
+                "pretty_name": "Recipients for all mail", 
                 "data_type": "list", 
                 "callback": null, 
                 "tooltip": "misc", 
@@ -29,7 +36,8 @@
             "enabled": true, 
             "name": "Mail It", 
             "file": "vfxCTK_config_mailIt", 
-            "description": "etc"
+            "description": "etc",
+            "help_url": "https://debug.github.io/vfxClientToolkit/html/index.html"
         }
     }
 }

@@ -19,6 +19,7 @@ PLAYLIST_UNFOLD_LIMIT = 15
 PLAYLIST_LIMIT = 50
 
 VERSION_COUNT_OPTIONS = [str(15), str(25), str(35), str(45)]
+SHOT_STATUS_MAPPING = sg.schemaRead("Shot", "sg_status_list")
 
 PACKAGE_STATUS_MAPPING = {'ip':  'Packaged'}
 
@@ -130,7 +131,7 @@ class NoteBaoUi(QtWidgets.QMainWindow):
                     os.mkdir(path)
                 except:
                     pass
-                print(selectedVersions)
+
                 for version in selectedVersions[playlist.playlistObj.name]:
                     versionNotes = version.getNotes()
                     if versionNotes != []:
@@ -149,12 +150,11 @@ class NoteBaoUi(QtWidgets.QMainWindow):
 
                                 for attachment in note.attachments:
                                     fileName = attachment.download(os.path.join(path, version.name))
-                                    print("!!!", fileName)
                                     attachmentFileNames = attachmentFileNames + "{0}, ".format(os.path.split(fileName)[1])
                             
-                                versionList = [version.info['entity']['name'], version.name, CONFIG_DATA['shotgun']['settings']['shot_status_mapping'][version.shot.status], noteStr, note.createdAt, version.status, attachmentFileNames]
+                                versionList = [version.info['entity']['name'], version.name, SHOT_STATUS_MAPPING[version.shot.status], noteStr, note.createdAt, version.status, attachmentFileNames]
                             else:
-                                versionList = [version.info['entity']['name'], version.name, CONFIG_DATA['shotgun']['settings']['shot_status_mapping'][version.shot.status], noteStr, note.createdAt, version.status, ""]
+                                versionList = [version.info['entity']['name'], version.name, SHOT_STATUS_MAPPING[version.shot.status], noteStr, note.createdAt, version.status, ""]
 
                             output.append(versionList)
 
@@ -283,7 +283,8 @@ class PlaylistTree(QtWidgets.QTreeWidget):
         versions = {}
         for i in range(self.topLevelItemCount()):
             topItem = self.topLevelItem(i)
-            versions[topItem.text(1)] = []
+            if not topItem.text(1) in versions:
+                versions[topItem.text(1)] = []
             for i in range(topItem.childCount()):
                 childItem = topItem.child(i)
                 if childItem.checkState(0) == QtCore.Qt.CheckState.Checked:

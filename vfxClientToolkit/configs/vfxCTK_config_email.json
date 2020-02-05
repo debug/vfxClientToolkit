@@ -4,29 +4,39 @@
             "callback": null, 
             "enabled": true, 
             "name": "Email", 
+            "callback": {
+                "func": "sendEmailTest", 
+                "module": "vfxClientToolkit.configs.utils.emailUtil", 
+                "label": "Test Email"
+            },
             "file": "vfxCTK_config_email", 
+            "help_url": "https://debug.github.io/vfxClientToolkit/html/index.html",
             "description": "etc"
         }, 
         "settings": {
             "username": {
                 "data_type": "string", 
+                "pretty_name": "User name", 
                 "callback": null, 
                 "tooltip": "misc", 
                 "value": null
             }, 
             "password": {
-                "data_type": "string", 
+                "pretty_name": "Password", 
+                "data_type": "password", 
                 "callback": null, 
                 "tooltip": "misc", 
                 "value": null
             }, 
             "smtp": {
+                "pretty_name": "SMTP Server", 
                 "data_type": "string", 
                 "callback": null, 
                 "tooltip": "misc", 
                 "value": null
             }, 
             "port": {
+                "pretty_name": "Port Num", 
                 "data_type": "int", 
                 "callback": null, 
                 "tooltip": "misc", 

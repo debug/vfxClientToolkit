@@ -2,35 +2,31 @@
     "ingestIt": {
         "metadata": {
             "callback": null, 
+            "help_url": "https://debug.github.io/vfxClientToolkit/html/index.html",
             "enabled": true, 
             "name": "Ingest It", 
             "file": "vfxCTK_config_ingestIt", 
             "description": "etc"
         }, 
         "settings": {
-            "vendor_mapping": {
-                "data_type": "dict", 
-                "callback": null, 
-                "type": "Group", 
-                "tooltip": "misc", 
-                "value": {
-                    "shortName": null, 
-                    "id": null, 
-                    "name": null
-                }
-            }, 
             "email_recipients": {
+                "pretty_name": "Email Recipients", 
                 "data_type": "list", 
                 "callback": null, 
                 "type": "Group", 
-                "tooltip": "misc", 
+                "tooltip": "All the recipients that will receive ingest notification mail.", 
                 "value": null
             }, 
             "incoming_root": {
+                "pretty_name": "Incoming Directory Root", 
                 "data_type": "path", 
-                "callback": null, 
+                "callback": {
+                "func": "browseForIncoming", 
+                "module": "vfxClientToolkit.configs.utils.ingestIt", 
+                "label": "Browse"
+                }, 
                 "type": "Group", 
-                "tooltip": "misc", 
+                "tooltip": "Directory path of all of the recieved packages.", 
                 "value": null
             }
         }

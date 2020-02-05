@@ -2,6 +2,7 @@
     "fml": {
         "metadata": {
             "callback": null, 
+            "help_url": "https://debug.github.io/vfxClientToolkit/html/index.html",
             "enabled": true, 
             "name": "FML", 
             "file": "vfxCTK_config_fml", 
@@ -10,7 +11,12 @@
         "settings": {
             "rv": {
                 "data_type": "path", 
-                "callback": null, 
+                "callback": {
+                "func": "browseForRV", 
+                "module": "vfxClientToolkit.configs.utils.fml", 
+                "label": "Browse"
+                },
+                "pretty_name": "Path to RV Binary", 
                 "tooltip": "misc", 
                 "value": null
             }

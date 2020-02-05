@@ -505,7 +505,9 @@ class ConfigPanel(QtWidgets.QGroupBox):
         currentDeliveryIndex = vfxSG.getAllDeliveries(handle)
         self.__batchNumberSpinner.setValue(currentDeliveryIndex)
 
-        destinations = [destination['name'] for destination in CONFIG_DATA['mrFilmOut']['settings']['delivery_destinations']]
+        vendors = vfxSG.getVendors()
+        destinations = [vendor.name for vendor in vendors]
+
         self.__destinationCombo.addItems(destinations)
 
         self.__deliveryMethodComboBox.addItems(self.DELIVERY_METHODS)

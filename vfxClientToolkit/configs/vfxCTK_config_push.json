@@ -3,18 +3,26 @@
         "metadata": {
             "callback": null, 
             "enabled": true, 
+            "help_url": "https://debug.github.io/vfxClientToolkit/html/index.html",
             "name": "Push Notifications", 
             "file": "vfxCTK_config_push", 
-            "description": "etc"
+            "description": "etc",
+            "callback": {
+                "func": "sendTestPush", 
+                "module": "vfxClientToolkit.configs.utils.push", 
+                "label": "Test Push Notification"
+                }
         }, 
         "settings": {
             "token": {
+                "pretty_name": "Token Value", 
                 "data_type": "string", 
                 "callback": null, 
                 "tooltip": "misc", 
                 "value": null
             }, 
             "user": {
+                "pretty_name": "User Key", 
                 "data_type": "string", 
                 "callback": null, 
                 "tooltip": "misc", 

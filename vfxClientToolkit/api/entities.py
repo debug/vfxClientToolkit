@@ -488,5 +488,26 @@ class Attachment(AbstractEntity):
         return filePath
 
 
+class Vendor(AbstractEntity):
+
+    def __init__(self, infoDict, sgHandle):
+        AbstractEntity.__init__(self, infoDict, sgHandle)
+
+    @property
+    def name(self):
+        return self.info['name']
+
+    @property
+    def firstName(self):
+        return self.info['firstname']
+
+    @property
+    def lastName(self):
+        return self.info['lastname']
+
+    @property
+    def tags(self):
+        return self.info['tags']
+
 if __name__ == "__main__":
     pass

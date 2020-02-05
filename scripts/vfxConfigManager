@@ -1,13 +1,23 @@
 #!/usr/bin/env python
 
-from qtpy import QtWidgets, QtCore
+import sys
+import json
+from functools import partial
+import importlib
+import webbrowser
+
+from qtpy import QtWidgets, QtCore, QtGui
 import qtmodern.styles
 import qtmodern.windows
-import sys
 
 from vfxClientToolkit import __pretty_title__
-from vfxClientToolkit.api.config import ConfigBundle
+from vfxClientToolkit.api.config import ConfigBundle, LOCAL_CONFIG_DIR
+import vfxClientToolkit.ui.utils as uiUtils
+from vfxClientToolkit.ui.combo_checkbox import CheckComboBox
+from vfxClientToolkit.icons import HELP_ICON, PLUS_ICON, MINUS_ICON
+import vfxClientToolkit.api.logger as vfxLogger
 
+LOGGER = vfxLogger.getLogger()
 
 class ConfigManagerUi(QtWidgets.QMainWindow):
 
@@ -21,10 +31,12 @@ class ConfigManagerUi(QtWidgets.QMainWindow):
 
     def __setup(self):
         self.__settingTabStack = []
-        cb = ConfigBundle()
-        self.__contexts = cb.getContexts()
+        self.__cb = ConfigBundle()
+        self.__configTemplates = self.__cb.getTemplates()
 
     def __setupUi(self):
+
+        uiUtils.centerWidget(self)
         self.setWindowTitle(self.TITLE)
         mainWidget = QtWidgets.QWidget()
         self.setCentralWidget(mainWidget)
@@ -39,6 +51,7 @@ class ConfigManagerUi(QtWidgets.QMainWindow):
                                              QtWidgets.QSizePolicy.Fixed)
 
         self.__saveButton = QtWidgets.QPushButton("Save")
+
         self.__closeButton = QtWidgets.QPushButton("Close")
 
         buttonLayout.addItem(buttonSpacer)
@@ -48,11 +61,17 @@ class ConfigManagerUi(QtWidgets.QMainWindow):
         self.__tabWidget = QtWidgets.QTabWidget()
         mainLayout.addWidget(self.__tabWidget)
 
-        for context, data in self.__contexts.items():
-            settingsWidget = SettingsWidget(data)
+        count = 0
+
+        for context, data in self.__configTemplates.items():
+            settingsWidget = SettingsWidget(data, context)
 
             self.__settingTabStack.append(settingsWidget)
             self.__tabWidget.addTab(settingsWidget, data['metadata']['name'])
+
+            if count == 9:
+                break
+            count = count + 1
 
         mainLayout.addLayout(buttonLayout)
 
@@ -67,6 +86,8 @@ class ConfigManagerUi(QtWidgets.QMainWindow):
         for widget in self.__settingTabStack:
             widget.save()
 
+        QtWidgets.QMessageBox().information(self, "Save Successful", "Save Successful")
+
     @QtCore.Slot()
     def closeEvent(self, event):
         reply = QtWidgets.QMessageBox.question(self, 'Exit', 'Do you want to exit?')
@@ -79,10 +100,13 @@ class ConfigManagerUi(QtWidgets.QMainWindow):
 
 class SettingsWidget(QtWidgets.QWidget):
 
-    def __init__(self, settings):
+    def __init__(self, settings, context):
         QtWidgets.QWidget.__init__(self)
+        self.__settingsWidgetStack = {}
         self.__settings = settings
+        self.__context = context
         self.__setupUi()
+        self.__populateWidgets()
 
     def __setupUi(self):
         layoutSpacer = QtWidgets.QSpacerItem(0, 0,
@@ -90,87 +114,420 @@ class SettingsWidget(QtWidgets.QWidget):
                                              QtWidgets.QSizePolicy.Expanding)
 
         layout = QtWidgets.QVBoxLayout()
+        buttonLayout = QtWidgets.QHBoxLayout()
+
         for settingName, settingData in self.__settings['settings'].items():
-            if isinstance(settingData, str):
-                stringSettingWidget = SettingsStringWidget(settingName, settingData)
+            if settingData['data_type'] == "string":
+                stringSettingWidget = SettingsStringWidget(settingName, settingData, self)
                 layout.addWidget(stringSettingWidget)
+                self.__settingsWidgetStack[settingName] = stringSettingWidget
 
-            elif isinstance(settingData, dict):
-                dictSettingWidget = SettingsDictWidget(settingName, settingData)
-                layout.addWidget(dictSettingWidget)
+            if settingData['data_type'] == "password":
+                stringSettingWidget = SettingsStringWidget(settingName, settingData, self, password=True)
+                layout.addWidget(stringSettingWidget)
+                self.__settingsWidgetStack[settingName] = stringSettingWidget
 
-            elif isinstance(settingData, list):
-                listSettingWidget = SettingsListWidget(settingName, settingData)
+            elif settingData['data_type'] == "list_dict":
+                stringSettingWidget = SettingsListDictWidget(settingName, settingData, self)
+                layout.addWidget(stringSettingWidget)
+                self.__settingsWidgetStack[settingName] = stringSettingWidget
+
+            elif settingData['data_type'] == "path":
+                pathSettingWidget = SettingsPathWidget(settingName, settingData, self)
+                layout.addWidget(pathSettingWidget)
+                self.__settingsWidgetStack[settingName] = pathSettingWidget
+
+            elif settingData['data_type'] == "list":
+                listSettingWidget = SettingsStringListWidget(settingName, settingData, self)
                 layout.addWidget(listSettingWidget)
+                self.__settingsWidgetStack[settingName] = listSettingWidget
+
+            elif settingData['data_type'] == "int":
+                intSettingWidget = SettingsIntWidget(settingName, settingData, self)
+                layout.addWidget(intSettingWidget)
+                self.__settingsWidgetStack[settingName] = intSettingWidget
+
+            elif settingData['data_type'] == "custom":
+                customSettingWidget = SettingsCustomWidget(settingName, settingData, self)
+                layout.addWidget(customSettingWidget)
+                self.__settingsWidgetStack[settingName] = customSettingWidget
 
         layout.addItem(layoutSpacer)
+
+        buttonSpacer = QtWidgets.QSpacerItem(0, 0,
+                                             QtWidgets.QSizePolicy.Expanding,
+                                             QtWidgets.QSizePolicy.Expanding)
+
+        buttonLayout.addItem(buttonSpacer)
+
+        if self.__settings['metadata']['callback'] != None:
+            callbackButton = QtWidgets.QPushButton(self.__settings['metadata']['callback']['label'])
+            buttonLayout.addWidget(callbackButton)
+            callbackButton.released.connect(partial(self.__callbackEvent, self.__settings['metadata']['callback']))
+
+        helpButton = QtWidgets.QPushButton("Open Help")
+        buttonLayout.addWidget(helpButton)
+        helpButton.released.connect(partial(self.__openWebHelp, self.__settings['metadata']['help_url']))
+
+        layout.addLayout(buttonLayout)
+
         self.setLayout(layout)
+
+    def __populateWidgets(self):
+        cb = ConfigBundle()
+        bundles = cb.getContexts()
+
+        for bundleName, data in bundles.items():
+            if self.__settings['metadata']['file'] in data['metadata']['file']:
+                for settingName, settingData in data['settings'].items():
+                    if settingName in self.__settingsWidgetStack:
+                        self.__settingsWidgetStack[settingName].setSetting(settingData)
 
     def save(self):
-        print(self.__settings['metadata']['file'])
+        if LOCAL_CONFIG_DIR.exists() == False:
+            LOCAL_CONFIG_DIR.mkdir()
 
+        configFilePath = LOCAL_CONFIG_DIR / "{0}.json".format(self.__settings['metadata']['file'])
 
-class SettingsStringWidget(QtWidgets.QWidget):
+        settingsDict = {}
+        settingsDict[self.__context] = {'settings': {}}
 
-    def __init__(self, label, data):
+        settingsDict[self.__context]['settings'] = {}
+
+        for settingName, widget in self.__settingsWidgetStack.items():
+            settingsDict[self.__context]['settings'][settingName] = widget.settings()[list(widget.settings().keys())[0]]
+
+        settingsDict[self.__context]['metadata'] = self.__settings['metadata']
+        fh = open(configFilePath, 'w')
+
+        fh.write(json.dumps(settingsDict, indent=4))
+        fh.close()
+
+        LOGGER.debug("Saved config file {0}".format(configFilePath))
+
+    def __openWebHelp(self, url):
+        webbrowser.open_new_tab(url)
+
+    def __callbackEvent(self, callback):
+        module = importlib.import_module(callback['module'])
+        func = getattr(module, callback['func'])
+        func(self)
+
+    def getSettings(self):
+        settings = {}
+        for name, widget in self.__settingsWidgetStack.items():
+            settings[list(widget.settings().keys())[0]] = widget.settings()[list(widget.settings().keys())[0]]
+
+        return settings
+
+class AbstractSettingsWidget(QtWidgets.QWidget):
+
+    def __init__(self, label, data, parentWidget):
         QtWidgets.QWidget.__init__(self)
         self.__label = label
         self.__data = data
+        self.__parentWidget = parentWidget
+
+    @property
+    def settings(self):
+        pass
+    
+    def getParentSettings(self):
+        return self.__parentWidget.getSettings()
+
+    @property
+    def data(self):
+        return self.__data
+
+    @property
+    def label(self):
+        return self.__label
+
+    def setSetting(self, settingIn):
+        pass
+
+
+class SettingsStringWidget(AbstractSettingsWidget):
+
+    def __init__(self, label, data, parentWidget, password=False):
+        AbstractSettingsWidget.__init__(self, label, data, parentWidget)
+        self.__passwordState = password
         self.__setupUi()
+        self.__populateWidgets()
 
     def __setupUi(self):
         layout = QtWidgets.QHBoxLayout()
-        label = QtWidgets.QLabel(self.__label)
+        label = QtWidgets.QLabel("{0}:".format(self.data['pretty_name']))
+
+        labelSpacer = QtWidgets.QSpacerItem(0, 0,
+                                             QtWidgets.QSizePolicy.Expanding,
+                                             QtWidgets.QSizePolicy.Expanding)
+
         layout.addWidget(label)
+        layout.addItem(labelSpacer)
+        toolTipIcon = ToolTipIcon(self.data['tooltip'])
 
         self.__lineEdit = QtWidgets.QLineEdit()
-        self.__lineEdit.setText(self.__data)
+        if self.__passwordState:
+            self.__lineEdit.setEchoMode(QtWidgets.QLineEdit.Password);
+        self.__lineEdit.setFixedWidth(300)
+
         layout.addWidget(self.__lineEdit)
-
+        layout.addWidget(toolTipIcon)
         self.setLayout(layout)
 
+    def __populateWidgets(self):
+        pass
 
-class SettingsDictWidget(QtWidgets.QWidget):
+    def settings(self):
+        return {self.label: self.__lineEdit.text()}
 
-    def __init__(self, label, data):
-        QtWidgets.QWidget.__init__(self)
-        self.__label = label
-        self.__data = data
+    def setSetting(self, settingIn):
+        #lame name
+        self.__lineEdit.setText(settingIn)
+
+class SettingsIntWidget(AbstractSettingsWidget):
+
+    def __init__(self, label, data, parentWidget):
+        AbstractSettingsWidget.__init__(self, label, data, parentWidget)
+        self.__setupUi()
+        self.__populateWidgets()
+
+    def __setupUi(self):
+        layout = QtWidgets.QHBoxLayout()
+        label = QtWidgets.QLabel("{0}:".format(self.data['pretty_name']))
+
+        layout.addWidget(label)
+        toolTipIcon = ToolTipIcon(self.data['tooltip'])
+
+        self.__spinBox = QtWidgets.QSpinBox()
+        self.__spinBox.setFixedWidth(300)
+        self.__spinBox.setMaximum(9999)
+
+        layout.addWidget(self.__spinBox)
+        layout.addWidget(toolTipIcon)
+        self.setLayout(layout)
+
+    def __populateWidgets(self):
+        pass
+
+    def settings(self):
+        return {self.label: self.__spinBox.value()}
+
+    def setSetting(self, settingIn):
+        #lame name
+        self.__spinBox.setValue(int(settingIn))
+
+
+class SettingsListDictWidget(AbstractSettingsWidget):
+
+    def __init__(self, label, data, parentWidget):
+        AbstractSettingsWidget.__init__(self, label, data, parentWidget)
         self.__setupUi()
 
     def __setupUi(self):
         layout = QtWidgets.QHBoxLayout()
-        label = QtWidgets.QLabel(self.__label)
+        label = QtWidgets.QLabel("{0}:".format(self.data['pretty_name']))
+
         layout.addWidget(label)
+        toolTipIcon = ToolTipIcon(self.data['tooltip'])
+        self.__combo = CheckComboBox()
 
-        self.__combobox = QtWidgets.QComboBox()
-        for item, data in self.__data.items():
-            self.__combobox.addItem("{0} - {1}".format(item, data))
-        layout.addWidget(self.__combobox)
+        layout.addWidget(self.__combo)
 
+        if self.data['callback'] != None:
+            callbackButton = QtWidgets.QPushButton(self.data['callback']['label'])
+            callbackButton.released.connect(self.__enactCallbackButton)
+
+            layout.addWidget(callbackButton)
+
+        layout.addWidget(toolTipIcon)
         self.setLayout(layout)
 
+    def settings(self):
+        self.__combo
+        return {self.label: None}
 
-class SettingsListWidget(QtWidgets.QWidget):
+    def __enactCallbackButton(self):
+        module = importlib.import_module(self.data['callback']['module'])
+        func = getattr(module, self.data['callback']['func'])
+        func(self)
 
-    def __init__(self, label, data):
-        QtWidgets.QWidget.__init__(self)
-        self.__label = label
-        self.__data = data
+    def populateDropbox(self, data):
+        for shortCode, prettyName in data.items():
+            self.__combo.addData("{0} - {1}".format(shortCode, prettyName))
+
+    def setSetting(self, settingIn):
+        pass
+
+
+class SettingsPathWidget(AbstractSettingsWidget):
+
+    def __init__(self, label, data, parentWidget):
+        AbstractSettingsWidget.__init__(self, label, data, parentWidget)
         self.__setupUi()
 
     def __setupUi(self):
         layout = QtWidgets.QHBoxLayout()
-        label = QtWidgets.QLabel(self.__label)
+        label = QtWidgets.QLabel("{0}:".format(self.data['pretty_name']))
+
         layout.addWidget(label)
+        toolTipIcon = ToolTipIcon(self.data['tooltip'])
 
-        self.__combobox = QtWidgets.QComboBox()
-        for item in self.__data:
-            self.__combobox.addItem(str(item))
+        self.__pathLineEdit = QtWidgets.QLineEdit()
 
-        layout.addWidget(self.__combobox)
+        layout.addWidget(self.__pathLineEdit)
+
+        if self.data['callback'] != None:
+            callbackButton = QtWidgets.QPushButton(self.data['callback']['label'])
+            callbackButton.released.connect(self.__enactCallbackButton)
+
+            layout.addWidget(callbackButton)
+
+        layout.addWidget(toolTipIcon)
+        self.setLayout(layout)
+
+    def settings(self):
+        return {self.label: self.__pathLineEdit.text()}
+
+    def __enactCallbackButton(self):
+        module = importlib.import_module(self.data['callback']['module'])
+        func = getattr(module, self.data['callback']['func'])
+        func(self)
+
+    def populateDropbox(self, data):
+        for shortCode, prettyName in data.items():
+            self.__combo.addData("{0} - {1}".format(shortCode, prettyName))
+
+    def setSetting(self, settingIn):
+        self.__pathLineEdit.setText(settingIn)
+
+class SettingsStringListWidget(AbstractSettingsWidget):
+
+    def __init__(self, label, data, parentWidget):
+        AbstractSettingsWidget.__init__(self, label, data, parentWidget)
+        self.__setupUi()
+        self.__setupSignals()
+
+    def __setupUi(self):
+        layout = QtWidgets.QHBoxLayout()
+        label = QtWidgets.QLabel("{0}:".format(self.data['pretty_name']))
+
+        layout.addWidget(label)
+        toolTipIcon = ToolTipIcon(self.data['tooltip'])
+
+        self.__listCombo = QtWidgets.QComboBox()
+
+        layout.addWidget(self.__listCombo)
+
+        if self.data['callback'] != None:
+            callbackButton = QtWidgets.QPushButton(self.data['callback']['label'])
+            callbackButton.released.connect(self.__enactCallbackButton)
+
+            layout.addWidget(callbackButton)
+
+        self.__addButton = QtWidgets.QPushButton("")
+        self.__addButton.setIcon(QtGui.QIcon(PLUS_ICON))
+
+        self.__minusButton = QtWidgets.QPushButton("")
+        self.__minusButton.setIcon(QtGui.QIcon(MINUS_ICON))
+
+        layout.addWidget(self.__addButton)
+        layout.addWidget(self.__minusButton)
+
+        layout.addWidget(toolTipIcon)
 
         self.setLayout(layout)
+
+    def settings(self):
+        items = []
+        for i in range(self.__listCombo.count()):
+            items.append(self.__listCombo.itemText(i))
+        return {self.label: items}
+
+    def __enactCallbackButton(self):
+        module = importlib.import_module(self.data['callback']['module'])
+        func = getattr(module, self.data['callback']['func'])
+        func(self)
+
+    def populateDropbox(self, data):
+        for shortCode, prettyName in data.items():
+            self.__combo.addData("{0} - {1}".format(shortCode, prettyName))
+
+    def setSetting(self, settingIn):
+        self.__listCombo.addItems(settingIn)
+
+    def addItem(self):
+        text, status = QtWidgets.QInputDialog.getText(self, 'Add', 'Enter data:')
+        if status:
+            self.__listCombo.addItem(text)
+            self.__listCombo.setCurrentIndex(self.__listCombo.findText(text))
+
+    def removeItem(self):
+        self.__listCombo.removeItem(self.__listCombo.findText(self.__listCombo.currentText()))
+        pass
+
+    def __setupSignals(self):
+        self.__addButton.released.connect(self.addItem)
+        self.__minusButton.released.connect(self.removeItem)
+
+class SettingsCustomWidget(AbstractSettingsWidget):
+
+    def __init__(self, label, data, parentWidget, password=False):
+        AbstractSettingsWidget.__init__(self, label, data, parentWidget)
+        self.__passwordState = password
+        self.__setupUi()
+        self.__populateWidgets()
+
+    def __setupUi(self):
+        layout = QtWidgets.QHBoxLayout()
+        label = QtWidgets.QLabel("{0}:".format(self.data['pretty_name']))
+
+        layout.addWidget(label)
+        toolTipIcon = ToolTipIcon(self.data['tooltip'])
+
+        if self.data['callback'] != None:
+            callbackButton = QtWidgets.QPushButton(self.data['callback']['label'])
+            callbackButton.released.connect(self.__enactCallbackButton)
+
+            layout.addWidget(callbackButton)
+        layout.addWidget(toolTipIcon)
+        self.setLayout(layout)
+
+    def __populateWidgets(self):
+        pass
+
+    def settings(self):
+        return {self.label: self.__data}
+
+    def setSetting(self, settingIn):
+        #lame name
+        self.__data = settingIn
+
+    def __enactCallbackButton(self):
+        module = importlib.import_module(self.data['callback']['module'])
+        func = getattr(module, self.data['callback']['func'])
+        func(self)
+
+
+
+
+class ToolTipIcon(QtWidgets.QLabel):
+
+    def __init__(self, tooltip):
+        QtWidgets.QLabel.__init__(self)
+        self.__tooltip = tooltip
+        self.setPixmap(QtGui.QPixmap(HELP_ICON))
+
+
+    def event(self, event):
+        if event.type() == QtCore.QEvent.ToolTip:
+            helpEvent = event
+            QtWidgets.QToolTip.showText(helpEvent.globalPos(), self.__tooltip)
+
+            return True
+
+        return super(ToolTipIcon, self).event(event)
 
 
 def run():

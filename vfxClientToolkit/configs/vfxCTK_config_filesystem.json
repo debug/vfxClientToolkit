@@ -4,19 +4,30 @@
             "callback": null, 
             "enabled": true, 
             "name": "File System", 
+            "help_url": "https://debug.github.io/vfxClientToolkit/html/index.html",
             "file": "vfxCTK_config_filesystem", 
             "description": "etc"
         }, 
         "settings": {
             "project_tree_root": {
+                "pretty_name": "Project Tree Root", 
                 "data_type": "path", 
-                "callback": null, 
+                "callback": {
+                "func": "browseForFileRoot", 
+                "module": "vfxClientToolkit.configs.utils.filesystem", 
+                "label": "Browse"
+                }, 
                 "tooltip": "misc", 
                 "value": null
             }, 
             "posix_prefix": {
+                "pretty_name": "Posix Prefix", 
                 "data_type": "path", 
-                "callback": null, 
+                "callback": {
+                "func": "browseForPosix", 
+                "module": "vfxClientToolkit.configs.utils.filesystem", 
+                "label": "Browse"
+                }, 
                 "tooltip": "misc", 
                 "value": null
             }
