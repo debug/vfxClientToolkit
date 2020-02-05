@@ -7,7 +7,7 @@ class ComboCheckBoxDelegate(QItemDelegate):
         super(ComboCheckBoxDelegate, self).__init__(parent)
 
     def createEditor(parent, op, idx):
-        self.editor = QCheckBox(parent)
+        parent.editor = QCheckBox(parent)
 
 class CheckComboBox(QComboBox):
 
