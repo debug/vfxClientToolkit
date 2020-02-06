@@ -17,7 +17,7 @@
                 "label": "Browse"
                 },
                 "pretty_name": "Path to RV Binary", 
-                "tooltip": "misc", 
+                "tooltip": "Path to the RV executable.", 
                 "value": null
             }
         }

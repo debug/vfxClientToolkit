@@ -340,7 +340,7 @@ class DirectoryItem(QtWidgets.QTreeWidgetItem):
         self.__vendorInfo = metadataUtils.getVendor(os.path.basename(self.path))
 
         if self.__vendorInfo is not None:
-            self.setText(2, self.__vendorInfo['name'])
+            self.setText(2, self.__vendorInfo.name)
         else:
             self.setText(2, "")
 

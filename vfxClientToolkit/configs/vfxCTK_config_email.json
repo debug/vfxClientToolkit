@@ -18,28 +18,28 @@
                 "data_type": "string", 
                 "pretty_name": "User name", 
                 "callback": null, 
-                "tooltip": "misc", 
+                "tooltip": "Username for SMTP server.", 
                 "value": null
             }, 
             "password": {
                 "pretty_name": "Password", 
                 "data_type": "password", 
                 "callback": null, 
-                "tooltip": "misc", 
+                "tooltip": "Password for specified username.", 
                 "value": null
             }, 
             "smtp": {
                 "pretty_name": "SMTP Server", 
                 "data_type": "string", 
                 "callback": null, 
-                "tooltip": "misc", 
+                "tooltip": "SMTP server address.", 
                 "value": null
             }, 
             "port": {
                 "pretty_name": "Port Num", 
                 "data_type": "int", 
                 "callback": null, 
-                "tooltip": "misc", 
+                "tooltip": "Port number.", 
                 "value": null
             }
         }

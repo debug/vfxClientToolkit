@@ -33,19 +33,24 @@ def getFrameRange(sequence):
         return [matchFirstFrame.groups()[0], matchLastFrame.groups()[0]]
 
 def getVendor(path):
-    vendorMapping = CONFIG_DATA['ingestIt']['settings']['vendor_mapping']
+    #vendorMapping = CONFIG_DATA['ingestIt']['settings']['vendor_mapping']
+
+    vendors = sg.getVendors()
+    vendorDict = {}
 
     matchStr = ".+("
 
-    for vendor in vendorMapping.keys():
-        matchStr = matchStr + "{0}|".format(vendor)
+    for vendor in vendors:
+        matchStr = matchStr + "{0}|".format(vendor.tags[0]['name'])
+        vendorDict[vendor.tags[0]['name']] = vendor
 
     combinedString = matchStr[:-1] + ")_.+"
 
     matchObj = re.match(combinedString, path)
+    print(combinedString, path)
     if matchObj != None:
-        if matchObj.groups()[0] in vendorMapping:
-            return vendorMapping[matchObj.groups()[0]]
+        if matchObj.groups()[0] in vendorDict:
+            return vendorDict[matchObj.groups()[0]]
         else:
             return None
 
@@ -155,5 +160,7 @@ def buildExtendedManifest(path):
         else:
             addToDict(manifest, "shot", shotName, "support_files", None)
 
-
     return manifest
+
+if __name__ == "__main__":
+    getVendor("")

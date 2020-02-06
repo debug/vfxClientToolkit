@@ -1,15 +1,16 @@
 import re
 import datetime
+import ssl
 
 import shotgun_api3
 from vfxClientToolkit.api.config import ConfigBundle
 import vfxClientToolkit.api.entities as vfxEntities
 
-#Sequence, Shot, Version, Playlist
-
+ssl._create_default_https_context = ssl._create_unverified_context
 
 cb = ConfigBundle()
 CONFIG_DATA = cb.getContexts()
+
 
 def getShotgunHandle():
     """
@@ -323,6 +324,7 @@ def getAllDeliveries(sg):
     else:
         return indices[0]
 
+
 def schemaRead(entityType, fieldName):
     """
     Returns all delivery entities in Shotgun.
@@ -339,6 +341,7 @@ def schemaRead(entityType, fieldName):
     values = schema['sg_status_list']['properties']['display_values']['value']
 
     return values
+
 
 def getVendors():
     """

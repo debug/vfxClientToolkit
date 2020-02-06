@@ -17,7 +17,7 @@
                 "module": "vfxClientToolkit.configs.utils.filesystem", 
                 "label": "Browse"
                 }, 
-                "tooltip": "misc", 
+                "tooltip": "File path root where all published and tracked files are stored.", 
                 "value": null
             }, 
             "posix_prefix": {

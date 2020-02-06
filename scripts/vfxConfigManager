@@ -19,6 +19,7 @@ import vfxClientToolkit.api.logger as vfxLogger
 
 LOGGER = vfxLogger.getLogger()
 
+
 class ConfigManagerUi(QtWidgets.QMainWindow):
 
     TITLE = "{title} - Configuration Manager".format(title=__pretty_title__)
@@ -168,7 +169,11 @@ class SettingsWidget(QtWidgets.QWidget):
         helpButton = QtWidgets.QPushButton("Open Help")
         buttonLayout.addWidget(helpButton)
         helpButton.released.connect(partial(self.__openWebHelp, self.__settings['metadata']['help_url']))
+        layoutSpacer = QtWidgets.QSpacerItem(0, 0,
+                                             QtWidgets.QSizePolicy.Expanding,
+                                             QtWidgets.QSizePolicy.Expanding)
 
+        layout.addItem(layoutSpacer)
         layout.addLayout(buttonLayout)
 
         self.setLayout(layout)
@@ -219,6 +224,7 @@ class SettingsWidget(QtWidgets.QWidget):
             settings[list(widget.settings().keys())[0]] = widget.settings()[list(widget.settings().keys())[0]]
 
         return settings
+
 
 class AbstractSettingsWidget(QtWidgets.QWidget):
 
@@ -286,6 +292,7 @@ class SettingsStringWidget(AbstractSettingsWidget):
         #lame name
         self.__lineEdit.setText(settingIn)
 
+
 class SettingsIntWidget(AbstractSettingsWidget):
 
     def __init__(self, label, data, parentWidget):
@@ -304,6 +311,11 @@ class SettingsIntWidget(AbstractSettingsWidget):
         self.__spinBox.setFixedWidth(300)
         self.__spinBox.setMaximum(9999)
 
+        layoutSpacer = QtWidgets.QSpacerItem(0, 0,
+                                             QtWidgets.QSizePolicy.Expanding,
+                                             QtWidgets.QSizePolicy.Expanding)
+
+        layout.addItem(layoutSpacer)
         layout.addWidget(self.__spinBox)
         layout.addWidget(toolTipIcon)
         self.setLayout(layout)
@@ -332,7 +344,10 @@ class SettingsListDictWidget(AbstractSettingsWidget):
         layout.addWidget(label)
         toolTipIcon = ToolTipIcon(self.data['tooltip'])
         self.__combo = CheckComboBox()
-
+        layoutSpacer = QtWidgets.QSpacerItem(0, 0,
+                                             QtWidgets.QSizePolicy.Expanding,
+                                             QtWidgets.QSizePolicy.Expanding)
+        layout.addItem(layoutSpacer)
         layout.addWidget(self.__combo)
 
         if self.data['callback'] != None:
@@ -372,10 +387,16 @@ class SettingsPathWidget(AbstractSettingsWidget):
         label = QtWidgets.QLabel("{0}:".format(self.data['pretty_name']))
 
         layout.addWidget(label)
+
+        layoutSpacer = QtWidgets.QSpacerItem(0, 0,
+                                             QtWidgets.QSizePolicy.Expanding,
+                                             QtWidgets.QSizePolicy.Expanding)
+        layout.addItem(layoutSpacer)
+
         toolTipIcon = ToolTipIcon(self.data['tooltip'])
 
         self.__pathLineEdit = QtWidgets.QLineEdit()
-
+        self.__pathLineEdit.setFixedWidth(300)
         layout.addWidget(self.__pathLineEdit)
 
         if self.data['callback'] != None:
@@ -402,6 +423,7 @@ class SettingsPathWidget(AbstractSettingsWidget):
     def setSetting(self, settingIn):
         self.__pathLineEdit.setText(settingIn)
 
+
 class SettingsStringListWidget(AbstractSettingsWidget):
 
     def __init__(self, label, data, parentWidget):
@@ -417,6 +439,12 @@ class SettingsStringListWidget(AbstractSettingsWidget):
         toolTipIcon = ToolTipIcon(self.data['tooltip'])
 
         self.__listCombo = QtWidgets.QComboBox()
+        self.__listCombo.setFixedWidth(300)
+
+        layoutSpacer = QtWidgets.QSpacerItem(0, 0,
+                                             QtWidgets.QSizePolicy.Expanding,
+                                             QtWidgets.QSizePolicy.Expanding)
+        layout.addItem(layoutSpacer)
 
         layout.addWidget(self.__listCombo)
 
@@ -428,9 +456,11 @@ class SettingsStringListWidget(AbstractSettingsWidget):
 
         self.__addButton = QtWidgets.QPushButton("")
         self.__addButton.setIcon(QtGui.QIcon(PLUS_ICON))
+        self.__addButton.setFixedWidth(40)
 
         self.__minusButton = QtWidgets.QPushButton("")
         self.__minusButton.setIcon(QtGui.QIcon(MINUS_ICON))
+        self.__minusButton.setFixedWidth(40)
 
         layout.addWidget(self.__addButton)
         layout.addWidget(self.__minusButton)
@@ -443,6 +473,7 @@ class SettingsStringListWidget(AbstractSettingsWidget):
         items = []
         for i in range(self.__listCombo.count()):
             items.append(self.__listCombo.itemText(i))
+
         return {self.label: items}
 
     def __enactCallbackButton(self):
@@ -465,11 +496,11 @@ class SettingsStringListWidget(AbstractSettingsWidget):
 
     def removeItem(self):
         self.__listCombo.removeItem(self.__listCombo.findText(self.__listCombo.currentText()))
-        pass
 
     def __setupSignals(self):
         self.__addButton.released.connect(self.addItem)
         self.__minusButton.released.connect(self.removeItem)
+
 
 class SettingsCustomWidget(AbstractSettingsWidget):
 
@@ -486,11 +517,23 @@ class SettingsCustomWidget(AbstractSettingsWidget):
         layout.addWidget(label)
         toolTipIcon = ToolTipIcon(self.data['tooltip'])
 
+        layoutSpacer = QtWidgets.QSpacerItem(0, 0,
+                                             QtWidgets.QSizePolicy.Expanding,
+                                             QtWidgets.QSizePolicy.Expanding)
+        layout.addItem(layoutSpacer)
+
+
         if self.data['callback'] != None:
             callbackButton = QtWidgets.QPushButton(self.data['callback']['label'])
+            callbackButton.setFixedWidth(200)
             callbackButton.released.connect(self.__enactCallbackButton)
 
             layout.addWidget(callbackButton)
+
+        layoutSpacer = QtWidgets.QSpacerItem(0, 0,
+                                             QtWidgets.QSizePolicy.Expanding,
+                                             QtWidgets.QSizePolicy.Expanding)
+        layout.addItem(layoutSpacer)
         layout.addWidget(toolTipIcon)
         self.setLayout(layout)
 
@@ -508,8 +551,6 @@ class SettingsCustomWidget(AbstractSettingsWidget):
         module = importlib.import_module(self.data['callback']['module'])
         func = getattr(module, self.data['callback']['func'])
         func(self)
-
-
 
 
 class ToolTipIcon(QtWidgets.QLabel):

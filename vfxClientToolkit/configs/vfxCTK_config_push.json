@@ -18,14 +18,14 @@
                 "pretty_name": "Token Value", 
                 "data_type": "string", 
                 "callback": null, 
-                "tooltip": "misc", 
+                "tooltip": "API Token Key", 
                 "value": null
             }, 
             "user": {
                 "pretty_name": "User Key", 
                 "data_type": "string", 
                 "callback": null, 
-                "tooltip": "misc", 
+                "tooltip": "Uesr Key", 
                 "value": null
             }
         }

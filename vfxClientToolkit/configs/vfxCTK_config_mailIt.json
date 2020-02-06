@@ -5,7 +5,7 @@
                 "pretty_name": "Sequence(s) Whitelist", 
                 "data_type": "list", 
                 "callback": null, 
-                "tooltip": "misc", 
+                "tooltip": "Sequences that should be included when iterating over playlist", 
                 "value": null
             }, 
             "recipients_by_vendor": {
@@ -17,7 +17,7 @@
                 },
                 "data_type": "custom", 
                 "type": "Group", 
-                "tooltip": "misc", 
+                "tooltip": "Users to receive notification mail separated by vendor", 
                 "value": {
                     "vendor": null, 
                     "name": null
@@ -27,7 +27,7 @@
                 "pretty_name": "Recipients for all mail", 
                 "data_type": "list", 
                 "callback": null, 
-                "tooltip": "misc", 
+                "tooltip": "Recipients that receive mail regardless of vendor", 
                 "value": null
             }
         }, 

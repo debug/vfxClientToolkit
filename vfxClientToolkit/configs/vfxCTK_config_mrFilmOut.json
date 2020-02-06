@@ -13,7 +13,7 @@
                 "data_type": "dict", 
                 "pretty_name": "Dropbox Credentials", 
                 "callback": null, 
-                "tooltip": "misc", 
+                "tooltip": "Dropbox User API Credentials", 
                 "value": {
                     "access_token": null, 
                     "namespace_id": null
@@ -23,7 +23,7 @@
                 "pretty_name": "Dropbox Root", 
                 "data_type": "string", 
                 "callback": null, 
-                "tooltip": "misc", 
+                "tooltip": "Path root that files are uploaded to.", 
                 "value": null
             }, 
             "default_write_location": {
@@ -34,14 +34,14 @@
                 "module": "vfxClientToolkit.configs.utils.filesystem", 
                 "label": "Browse"
                 }, 
-                "tooltip": "misc", 
+                "tooltip": "Path that files are written to locally", 
                 "value": null
             }, 
             "email_recipients": {
                 "pretty_name": "Email Recipients", 
                 "data_type": "list", 
                 "callback": null, 
-                "tooltip": "misc", 
+                "tooltip": "List of people that receive notification mail upon filmOut", 
                 "value": null
             }
         }

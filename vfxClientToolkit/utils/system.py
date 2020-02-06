@@ -25,17 +25,17 @@ def copySupportFiles(path, file):
             pass
 
 def listIncomingDirectories():
+    print(CONFIG_DATA['filesystem']['settings'])
     dirs = []
-    for path in glob.glob("{0}/*".format(CONFIG_DATA['filesystem']['settings']['incoming_root'])):
+    for path in glob.glob("{0}/*".format(CONFIG_DATA['ingestIt']['settings']['incoming_root'])):
         if os.path.isdir(path):
             dirs.append(path)
     dirs.sort()
     dirs.reverse()
-    print(CONFIG_DATA['filesystem']['settings']['incoming_root'])
     return dirs
 
 def checkDriveMounts():
-    if os.path.exists(CONFIG_DATA['filesystem']['settings']['incoming_root']) and os.path.exists(CONFIG_DATA['filesystem']['settings']['project_tree_root']):
+    if os.path.exists(CONFIG_DATA['ingestIt']['settings']['incoming_root']) and os.path.exists(CONFIG_DATA['filesystem']['settings']['project_tree_root']):
         return True
     else:
         return False
