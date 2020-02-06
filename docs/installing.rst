@@ -5,13 +5,15 @@ Installing
 
 MacOS
 =====
+.. code-block:: bash
 
-pip3 install git+https://github.com/debug/vfxClientToolkit
+   pip3 install git+https://github.com/debug/vfxClientToolkit
 
 Linux
 =====
+.. code-block:: bash
 
-pip3 install git+https://github.com/debug/vfxClientToolkit
+   pip3 install git+https://github.com/debug/vfxClientToolkit
 
 
 Windows
