@@ -3,7 +3,7 @@
         "metadata": {
             "callback": null, 
             "enabled": true, 
-            "help_url": "https://debug.github.io/vfxClientToolkit/html/index.html",
+            "help_url": "https://debug.github.io/vfxClientToolkit/html/configuration.html#push-notifications",
             "name": "Push Notifications", 
             "file": "vfxCTK_config_push", 
             "description": "etc",

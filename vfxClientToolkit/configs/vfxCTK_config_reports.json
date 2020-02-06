@@ -7,7 +7,7 @@
             "file": "vfxCTK_config_reports", 
             "description": "etc",
             "pretty_name": "Report Generator", 
-            "help_url": "https://debug.github.io/vfxClientToolkit/html/index.html"
+            "help_url": "https://debug.github.io/vfxClientToolkit/html/configuration.html#reports-generator"
         }, 
         "settings": {
             "recipients": {

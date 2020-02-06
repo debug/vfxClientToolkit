@@ -5,7 +5,7 @@
             "enabled": true, 
             "name": "MrFilmOut", 
             "file": "vfxCTK_config_mrFilmOut", 
-            "help_url": "https://debug.github.io/vfxClientToolkit/html/index.html",
+            "help_url": "https://debug.github.io/vfxClientToolkit/html/configuration.html#mr-filmout",
             "description": "etc"
         }, 
         "settings": {

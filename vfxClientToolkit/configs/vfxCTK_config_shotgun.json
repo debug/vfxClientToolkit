@@ -39,7 +39,7 @@
                 "label": "Test Connection"
             },
             "file": "vfxCTK_config_shotgun",
-            "help_url": "https://debug.github.io/vfxClientToolkit/html/index.html",
+            "help_url": "https://debug.github.io/vfxClientToolkit/html/configuration.html#shotgun",
             "description": "etc"
         }
     }

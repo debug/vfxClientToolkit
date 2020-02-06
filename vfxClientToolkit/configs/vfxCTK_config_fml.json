@@ -2,7 +2,7 @@
     "fml": {
         "metadata": {
             "callback": null, 
-            "help_url": "https://debug.github.io/vfxClientToolkit/html/index.html",
+            "help_url": "https://debug.github.io/vfxClientToolkit/html/configuration.html#fml",
             "enabled": true, 
             "name": "FML", 
             "file": "vfxCTK_config_fml", 
