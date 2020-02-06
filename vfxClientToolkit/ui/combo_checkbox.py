@@ -1,4 +1,4 @@
-from qtpy.QtWidgets import QComboBox, QItemDelegate
+from qtpy.QtWidgets import QComboBox, QItemDelegate, QCheckBox
 from qtpy.QtGui import QStandardItem, QStandardItemModel
 
 class ComboCheckBoxDelegate(QItemDelegate):
