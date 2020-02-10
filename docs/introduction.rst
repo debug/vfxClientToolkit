@@ -7,6 +7,12 @@ The VFX Client Toolkit is a pipeline and series of utilities for management of d
 
   .. note:: At present these tools are only supported for use in tandem with Shotgun but other production tracking software is planned to be supported in the future.
 
+.. figure:: images/shot_lifecycle.png
+   :align: center
+   :alt: Life-cycle of a Shot
+   :figclass: align-center
+
+   Life-cycle of a Shot
 
 Requirements
 ------------
