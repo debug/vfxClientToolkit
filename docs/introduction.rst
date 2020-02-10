@@ -100,3 +100,5 @@ Configuration Manager
    vfxConfigManager Main Window
 
 Build to allow for easy configuration of all of the different utilities this allows non technical users to manage all the settings of the toolkit.
+
+More information can be found here: :doc:`tools/configuration`.
