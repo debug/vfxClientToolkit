@@ -10,8 +10,6 @@ This documentation covers the setup, usage and API for the VFX Client Toolkit.
 Introduction
 ------------
 
-document:
-
 .. toctree::
     :maxdepth: 2
 

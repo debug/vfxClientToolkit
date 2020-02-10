@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Requirements &mdash; vfxClientToolkit 0.0.1 documentation</title>
+  <title>Introduction &mdash; vfxClientToolkit 0.0.1 documentation</title>
   
 
   
@@ -81,7 +81,14 @@
             
             
               <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Requirements</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#requirements">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#ingest-it">Ingest It</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#notebao">NoteBao</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#mr-film-out">Mr Film Out</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#edl-builder">EDL Builder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#reports">Reports</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#configuration-manager">Configuration Manager</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="installing.html">Installing</a></li>
@@ -139,7 +146,7 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-      <li>Requirements</li>
+      <li>Introduction</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -158,14 +165,86 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <p>This documentation covers the setup, usage and API for the VFX Client Toolkit.</p>
-<p>This site covers Fabric’s usage &amp; API documentation. For basic info on what
-Fabric is, including its public changelog &amp; how the project is maintained,
-please see <a class="reference external" href="http://fabfile.org">the main project website</a>.</p>
+  <div class="section" id="introduction">
+<h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
+<p>The VFX Client Toolkit is a pipeline and series of utilities for management of data and versions when managing a project from the production (“client”) side, there are tools to cover every part of the life-cycle of a show:</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>At present these tools are only supported for use in tandem with Shotgun but other production tracking software is planned to be supported in the future.</p>
+</div>
+</div>
 <div class="section" id="requirements">
 <h1>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline">¶</a></h1>
-<p>Many core ideas &amp; API calls are explained in the tutorial/getting-started
-document:</p>
+<ul class="simple">
+<li><p>Shotgun (although other production tracking services will be supported in the future).</p></li>
+<li><p>Mac/Linux (Windows support currently under development).</p></li>
+<li><p>Local network file storage.</p></li>
+</ul>
+</div>
+<div class="section" id="ingest-it">
+<h1>Ingest It<a class="headerlink" href="#ingest-it" title="Permalink to this headline">¶</a></h1>
+<div class="align-center figure" id="id1">
+<img alt="Ingest It Main Window" src="_images/ingestIt_1.png" />
+<p class="caption"><span class="caption-text">Ingest It Main Window</span><a class="headerlink" href="#id1" title="Permalink to this image">¶</a></p>
+</div>
+<p>Developed to automate the ingestion of versions received from vendors with the auto uploading of associated notes into Shotgun as well as copying into a structured ‘show-tree’ directory structure.</p>
+<p>Other features include:</p>
+<ul class="simple">
+<li><p>Configurable to support a number of different manifest file types such as Excel, CSV and JSON file.</p></li>
+<li><p>Email and/or push notification upon successful ingest.</p></li>
+<li><p>Sanity check of EXR file sequences upon ingest to ensure integrity.</p></li>
+<li><p>Version tracking of custom files such as CDLs and colour cubes.</p></li>
+</ul>
+<p>More information can be found here: <a class="reference internal" href="tools/ingestIt.html"><span class="doc">Ingest It</span></a>.</p>
+</div>
+<div class="section" id="notebao">
+<h1>NoteBao<a class="headerlink" href="#notebao" title="Permalink to this headline">¶</a></h1>
+<div class="align-center figure" id="id2">
+<img alt="NoteBao Main Window" src="_images/noteBao_1.png" />
+<p class="caption"><span class="caption-text">NoteBao Main Window</span><a class="headerlink" href="#id2" title="Permalink to this image">¶</a></p>
+</div>
+<p>The management of notes from supervisors, directors and producers can be time consuming if there are multiple vendors presented in each review session and annotations are tracked in Shotgun, NoteBao makes it easy to save these out sorted into different export directories with annotations per version as well as a separate CSV or Excel spreadsheet that can be sent to the vendor.</p>
+<p>More information can be found here: <a class="reference internal" href="tools/noteBao.html"><span class="doc">NoteBao</span></a>.</p>
+</div>
+<div class="section" id="mr-film-out">
+<h1>Mr Film Out<a class="headerlink" href="#mr-film-out" title="Permalink to this headline">¶</a></h1>
+<div class="align-center figure" id="id3">
+<img alt="Mr Film Out Main Window" src="_images/mrFilmOut_1.png" />
+<p class="caption"><span class="caption-text">Mr Film Out’s Main Window</span><a class="headerlink" href="#id3" title="Permalink to this image">¶</a></p>
+</div>
+<p>Upon a shot completion or other milestone it may be required to send out both the MOV and associated data to DI or other vendors, mrFilmOut allows the easy automation and tracking of the creation of these delivery bundles, this tool is to be used in conjunction with IngestIt as it requires that the file system structure is consistent between both utilties, other features include:</p>
+<ul class="simple">
+<li><p>Auto uploading to either SFTP or Dropbox upon successful packaging.</p></li>
+<li><p>Creation of manifest file in either Excel or CSV.</p></li>
+<li><p>Email notification to different users based on vendor selection.</p></li>
+<li><p>Sanity check of EXR files can be run to ensure file sequences are intact and/or mattes are present.</p></li>
+</ul>
+<p>More information can be found here: <a class="reference internal" href="tools/mrFilmOut.html"><span class="doc">MrFilmOut</span></a>.</p>
+</div>
+<div class="section" id="edl-builder">
+<h1>EDL Builder<a class="headerlink" href="#edl-builder" title="Permalink to this headline">¶</a></h1>
+<p>Built for use with <a class="reference external" href="https://www.blackmagicdesign.com/products/davinciresolve/">Davinci Resolve</a> this makes it easy to build cuts using an EDL with the latest versions (or selected department preferences).</p>
+<p>More information can be found here: <a class="reference internal" href="tools/edlBuilder.html"><span class="doc">EDL Builder</span></a>.</p>
+</div>
+<div class="section" id="reports">
+<h1>Reports<a class="headerlink" href="#reports" title="Permalink to this headline">¶</a></h1>
+<p>A configurable email report system that:</p>
+<ul class="simple">
+<li><p>Can be run on a cron to email at repeated periods.</p></li>
+<li><p>Generates reports for milestone percentages based on version status (or other custom fields).</p></li>
+<li><p>Emails PDF/Excel file</p></li>
+<li><p>White/black list for applicable status.</p></li>
+<li><p>Can be configured to query other fields such as pathToFrames and highlight if these are missing if meeting certain criteria.</p></li>
+</ul>
+<p>More information can be found here: <a class="reference internal" href="tools/reports.html"><span class="doc">Reports</span></a>.</p>
+</div>
+<div class="section" id="configuration-manager">
+<h1>Configuration Manager<a class="headerlink" href="#configuration-manager" title="Permalink to this headline">¶</a></h1>
+<div class="align-center figure" id="id4">
+<img alt="vfxConfigManager Main Window" src="_images/shotgun_config.png" />
+<p class="caption"><span class="caption-text">vfxConfigManager Main Window</span><a class="headerlink" href="#id4" title="Permalink to this image">¶</a></p>
+</div>
+<p>Build to allow for easy configuration of all of the different utilities this allows non technical users to manage all the settings of the toolkit.</p>
 </div>
 
 
