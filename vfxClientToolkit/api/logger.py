@@ -2,7 +2,17 @@ import logging
 import logging.handlers
 import os
 import datetime
+from os.path import expanduser
+
+from vfxClientToolkit.constants import CONFIG_DIR
 from vfxClientToolkit import __title__
+
+def getLogDir():
+    logDir = os.path.join(expanduser("~"), CONFIG_DIR, "logs")
+    if os.path.exists(logDir) == False:
+        os.mkdir(logDir)
+
+    return logDir
 
 class SingletonType(type):
     _instances = {}
@@ -24,8 +34,7 @@ class CustomLogger(object, metaclass=SingletonType):
 
         now = datetime.datetime.now()
         #TODO fix this!
-        dirname = "/Users/dom/Desktop"
-
+        dirname = getLogDir()
         if not os.path.isdir(dirname):
             os.mkdir(dirname)
         fileHandler = logging.handlers.RotatingFileHandler(dirname + "/log_" + now.strftime("%Y-%m-%d")+".log")
