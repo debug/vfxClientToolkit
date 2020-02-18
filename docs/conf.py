@@ -17,12 +17,13 @@
 
 # -- Project information -----------------------------------------------------
 
+from vfxClientToolkit._version import __version__
 project = 'vfxClientToolkit'
 copyright = '2020, Dom Drane'
 author = 'Dom Drane'
 
 # The full version, including alpha/beta/rc tags
-release = '0.0.1'
+release = __version__
 
 
 # -- General configuration ---------------------------------------------------
