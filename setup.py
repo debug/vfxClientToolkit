@@ -69,5 +69,5 @@ setup(
     packages=find_packages(),
     long_description=read("README.md"),
     install_requires=requirements,
-    classifiers=["Topic :: VFX, Utilities", "License :: MIT",],
+    classifiers=["License :: OSI Approved :: MIT License"],
 )

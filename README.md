@@ -19,7 +19,7 @@ Toolset of common utilities for client-side visual effects production management
 
 Run the following in shell for installation:
 ```
-pip3 install git+https://github.com/debug/vfxClientToolkit
+pip install vfxClientToolkit
 ```
 Documentation [here.](https://debug.github.io/vfxClientToolkit)
 
