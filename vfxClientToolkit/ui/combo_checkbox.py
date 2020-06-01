@@ -1,16 +1,16 @@
 from qtpy.QtWidgets import QComboBox, QItemDelegate, QCheckBox
 from qtpy.QtGui import QStandardItem, QStandardItemModel
 
-class ComboCheckBoxDelegate(QItemDelegate):
 
+class ComboCheckBoxDelegate(QItemDelegate):
     def __init__(self, parent=None):
         super(ComboCheckBoxDelegate, self).__init__(parent)
 
     def createEditor(parent, op, idx):
         parent.editor = QCheckBox(parent)
 
-class CheckComboBox(QComboBox):
 
+class CheckComboBox(QComboBox):
     def __init__(self):
         QComboBox.__init__(self)
 

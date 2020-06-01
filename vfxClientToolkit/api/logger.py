@@ -7,12 +7,14 @@ from os.path import expanduser
 from vfxClientToolkit.constants import CONFIG_DIR
 from vfxClientToolkit import __title__
 
+
 def getLogDir():
     logDir = os.path.join(expanduser("~"), CONFIG_DIR, "logs")
     if os.path.exists(logDir) == False:
         os.mkdir(logDir)
 
     return logDir
+
 
 class SingletonType(type):
     _instances = {}
@@ -30,14 +32,18 @@ class CustomLogger(object, metaclass=SingletonType):
     def __init__(self):
         self._logger = logging.getLogger(__title__)
         self._logger.setLevel(logging.DEBUG)
-        formatter = logging.Formatter('%(asctime)s \t [%(levelname)s | %(filename)s:%(lineno)s] > %(message)s')
+        formatter = logging.Formatter(
+            "%(asctime)s \t [%(levelname)s | %(filename)s:%(lineno)s] > %(message)s"
+        )
 
         now = datetime.datetime.now()
-        #TODO fix this!
+        # TODO fix this!
         dirname = getLogDir()
         if not os.path.isdir(dirname):
             os.mkdir(dirname)
-        fileHandler = logging.handlers.RotatingFileHandler(dirname + "/log_" + now.strftime("%Y-%m-%d")+".log")
+        fileHandler = logging.handlers.RotatingFileHandler(
+            dirname + "/log_" + now.strftime("%Y-%m-%d") + ".log"
+        )
 
         streamHandler = logging.StreamHandler()
 

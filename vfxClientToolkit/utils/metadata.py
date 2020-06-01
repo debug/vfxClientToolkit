@@ -14,16 +14,18 @@ from vfxClientToolkit.constants import METADATA_ORDER, SUPPORT_FILES_DIR, EXR_DI
 
 CONFIG_DATA = vfxConfig.getBundles()
 
+
 def decomposeFileName(fileName):
     info = {}
     matchString = "([a-zA-Z][a-zA-Z][a-zA-Z])[0-9][0-9][0-9][0-9]_(.+)_(.+)"
 
     matchObj = re.match(matchString, fileName)
-    info['shot'] = fileName.split("_")[0]
-    info['seq'] = matchObj.groups()[0]
-    info['dept'] = matchObj.groups()[1]
-    info['version'] = matchObj.groups()[2]
+    info["shot"] = fileName.split("_")[0]
+    info["seq"] = matchObj.groups()[0]
+    info["dept"] = matchObj.groups()[1]
+    info["version"] = matchObj.groups()[2]
     return info
+
 
 def getFrameRange(sequence):
     if sequence != []:
@@ -32,8 +34,9 @@ def getFrameRange(sequence):
         matchLastFrame = re.match(".+([0-9][0-9][0-9][0-9]).exr", sequence[-1])
         return [matchFirstFrame.groups()[0], matchLastFrame.groups()[0]]
 
+
 def getVendor(path):
-    #vendorMapping = CONFIG_DATA['ingestIt']['settings']['vendor_mapping']
+    # vendorMapping = CONFIG_DATA['ingestIt']['settings']['vendor_mapping']
 
     vendors = sg.getVendors()
     vendorDict = {}
@@ -41,8 +44,8 @@ def getVendor(path):
     matchStr = ".+("
 
     for vendor in vendors:
-        matchStr = matchStr + "{0}|".format(vendor.tags[0]['name'])
-        vendorDict[vendor.tags[0]['name']] = vendor
+        matchStr = matchStr + "{0}|".format(vendor.tags[0]["name"])
+        vendorDict[vendor.tags[0]["name"]] = vendor
 
     combinedString = matchStr[:-1] + ")_.+"
 
@@ -53,6 +56,7 @@ def getVendor(path):
             return vendorDict[matchObj.groups()[0]]
         else:
             return None
+
 
 def openMetadataManifest(path):
     for metadataFormat in METADATA_ORDER:
@@ -67,26 +71,29 @@ def openMetadataManifest(path):
                 data = openJSONFile(file)
                 return data
 
+
 def openExcelFile(filePath):
     manifest = []
     dataFrame = pd.read_excel(filePath)
     for index in dataFrame.index:
         data = {}
-        data['version_name'] = dataFrame['Version Name'][index]
-        data['submission_notes'] = dataFrame['Submission Notes'][index]
-        data['dept'] = dataFrame['Dept'][index]
-        data['date'] = dataFrame['Date'][index]
-        data['shot'] = dataFrame['Shot'][index]
+        data["version_name"] = dataFrame["Version Name"][index]
+        data["submission_notes"] = dataFrame["Submission Notes"][index]
+        data["dept"] = dataFrame["Dept"][index]
+        data["date"] = dataFrame["Date"][index]
+        data["shot"] = dataFrame["Shot"][index]
 
         manifest.append(data)
 
     return manifest
 
+
 def openJSONFile(filePath):
-    fh = open(filePath, 'r')
+    fh = open(filePath, "r")
     data = json.loads(fh.read())
     fh.close()
     return data
+
 
 def openCSVFile(filePath):
     manifest = []
@@ -94,7 +101,7 @@ def openCSVFile(filePath):
     data = []
 
     with open(filePath) as csvFile:
-        csvReader = csv.reader(csvFile, delimiter=',')
+        csvReader = csv.reader(csvFile, delimiter=",")
 
         lineCount = 0
         for row in csvReader:
@@ -108,14 +115,15 @@ def openCSVFile(filePath):
 
     for row in data:
         rowData = {}
-        rowData['version_name'] = row[0]
-        rowData['shot'] = row[1]
-        rowData['submission_notes'] = row[2]
-        rowData['dept'] = row[3]
-        rowData['date'] = row[4]
+        rowData["version_name"] = row[0]
+        rowData["shot"] = row[1]
+        rowData["submission_notes"] = row[2]
+        rowData["dept"] = row[3]
+        rowData["date"] = row[4]
         manifest.append(rowData)
 
     return manifest
+
 
 def addToDict(parentList, key, value, newKey, newValue):
 
@@ -124,6 +132,7 @@ def addToDict(parentList, key, value, newKey, newValue):
             item[newKey] = newValue
 
     return parentList
+
 
 def buildExtendedManifest(path):
     shotgunHandle = sg.getShotgunHandle()
@@ -140,13 +149,15 @@ def buildExtendedManifest(path):
             addToDict(manifest, "shot", shotName, "mov_file", movFile)
 
             metaD = decomposeFileName(versionName)
-            addToDict(manifest, "shot", shotName, "seq", metaD['seq'])
-            addToDict(manifest, "shot", shotName, "dept", metaD['dept'])
-            addToDict(manifest, "shot", shotName, "version_number", metaD['version'])
+            addToDict(manifest, "shot", shotName, "seq", metaD["seq"])
+            addToDict(manifest, "shot", shotName, "dept", metaD["dept"])
+            addToDict(manifest, "shot", shotName, "version_number", metaD["version"])
 
         if (pathObj / EXR_DIR).exists():
             if (pathObj / EXR_DIR / versionName).exists():
-                addToDict(manifest, "shot", shotName, "exrs", (pathObj / "EXR" / versionName))
+                addToDict(
+                    manifest, "shot", shotName, "exrs", (pathObj / "EXR" / versionName)
+                )
             else:
                 addToDict(manifest, "shot", shotName, "exrs", None)
         else:
@@ -154,13 +165,20 @@ def buildExtendedManifest(path):
 
         if (pathObj / SUPPORT_FILES_DIR).exists():
             if (pathObj / SUPPORT_FILES_DIR / versionName).exists():
-                addToDict(manifest, "shot", shotName, "support_files", (pathObj / SUPPORT_FILES_DIR / versionName))
+                addToDict(
+                    manifest,
+                    "shot",
+                    shotName,
+                    "support_files",
+                    (pathObj / SUPPORT_FILES_DIR / versionName),
+                )
             else:
                 addToDict(manifest, "shot", shotName, "support_files", None)
         else:
             addToDict(manifest, "shot", shotName, "support_files", None)
 
     return manifest
+
 
 if __name__ == "__main__":
     getVendor("")

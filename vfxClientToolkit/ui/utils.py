@@ -1,5 +1,6 @@
 from qtpy import QtGui
 
+
 def centerWidget(parent):
     frame = parent.frameGeometry()
     primaryScreen = QtGui.QGuiApplication.primaryScreen()

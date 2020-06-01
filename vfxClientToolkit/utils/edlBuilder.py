@@ -24,7 +24,6 @@ class EditBuilderUi(QtWidgets.QWidget):
         edlBrowseLayout = QtWidgets.QHBoxLayout()
         edlLabel = QtWidgets.QLabel("EDL File:")
 
-
         self.__edlCombo = QtWidgets.QComboBox()
         self.__edlLineEdit = QtWidgets.QLineEdit()
         self.__edlBrowseButton = QtWidgets.QPushButton("Browse")
@@ -40,7 +39,6 @@ class EditBuilderUi(QtWidgets.QWidget):
         stagePreferenceLayout.addWidget(stagePreferenceLabel)
         stagePreferenceLayout.addWidget(self.__stagePreferenceCombo)
 
-
         buttonLayout = QtWidgets.QHBoxLayout()
         self.__buildItButton = QtWidgets.QPushButton("Build")
         buttonLayout.addWidget(self.__buildItButton)
@@ -55,7 +53,9 @@ class EditBuilderUi(QtWidgets.QWidget):
         self.__buildItButton.released.connect(self.__buildIt)
 
     def __browseForEDL(self):
-        edlFile = QtWidgets.QFileDialog.getOpenFileName(self, "Browse for EDL", None, "*.xml")
+        edlFile = QtWidgets.QFileDialog.getOpenFileName(
+            self, "Browse for EDL", None, "*.xml"
+        )
         self.__edlLineEdit.setText(edlFile[0])
 
     def __populateWidgets(self):
@@ -72,16 +72,20 @@ class EditBuilderUi(QtWidgets.QWidget):
                 for vItem in seqItem.items():
                     shotObj = vfxSG.getShot(vItem.name().split("_")[0], sgHandle)
 
-
                     if shotObj != None:
                         if self.__stagePreferenceCombo.currentText() == "Latest":
 
                             versionObj = shotObj.getVersions()
                         else:
-                            versionObj = shotObj.getVersionsByDept(str(self.__stagePreferenceCombo.currentText()))
+                            versionObj = shotObj.getVersionsByDept(
+                                str(self.__stagePreferenceCombo.currentText())
+                            )
 
                         if versionObj != []:
-                            if versionObj[0].task == "ret" or versionObj[0].task == None:
+                            if (
+                                versionObj[0].task == "ret"
+                                or versionObj[0].task == None
+                            ):
                                 if versionObj[1].pathToMov != None:
                                     vItem.replaceClips(versionObj[1].pathToMov)
 
@@ -92,7 +96,6 @@ class EditBuilderUi(QtWidgets.QWidget):
                             else:
                                 if versionObj[0].pathToMov != None:
                                     vItem.replaceClips(versionObj[0].pathToMov)
-
 
     def __loadEDL(self, edlFile):
         p = hiero.core.newProject()

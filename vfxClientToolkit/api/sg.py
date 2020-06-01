@@ -20,9 +20,11 @@ def getShotgunHandle():
         shotgun_api3.shotgun.Shotgun: Configured Shotgun object.
 
     """
-    sg = shotgun_api3.Shotgun(CONFIG_DATA['shotgun']['settings']['server'],
-         script_name=CONFIG_DATA['shotgun']['settings']['script_name'],
-         api_key=CONFIG_DATA['shotgun']['settings']['api_key'])
+    sg = shotgun_api3.Shotgun(
+        CONFIG_DATA["shotgun"]["settings"]["server"],
+        script_name=CONFIG_DATA["shotgun"]["settings"]["script_name"],
+        api_key=CONFIG_DATA["shotgun"]["settings"]["api_key"],
+    )
     return sg
 
 
@@ -37,7 +39,17 @@ def getPlaylists(sg):
         list: List of dictionaries with Shotgun entity information.
 
     """
-    sgPlaylists = sg.find("Playlist", [['project.Project.name', 'is', CONFIG_DATA['shotgun']['settings']['project_name']]], ['code'])
+    sgPlaylists = sg.find(
+        "Playlist",
+        [
+            [
+                "project.Project.name",
+                "is",
+                CONFIG_DATA["shotgun"]["settings"]["project_name"],
+            ]
+        ],
+        ["code"],
+    )
     playlistObjs = []
     for playlist in sgPlaylists:
         playlistObjs.append(vfxEntities.Playlist(playlist, sg))
@@ -55,11 +67,9 @@ def getProject():
 
     """
     sgHandle = getShotgunHandle()
-    filters = [
-        ['name', 'is', CONFIG_DATA['shotgun']['settings']['project_name']]
-    ]
-    fields = ['id', 'name']
-    sg_project = sgHandle.find_one('Project', filters, fields)
+    filters = [["name", "is", CONFIG_DATA["shotgun"]["settings"]["project_name"]]]
+    fields = ["id", "name"]
+    sg_project = sgHandle.find_one("Project", filters, fields)
 
     return sg_project
 
@@ -75,7 +85,17 @@ def getSequences():
     seqObjs = []
     sg = getShotgunHandle()
 
-    sequences = sg.find("Sequence", [['project.Project.name', 'is', CONFIG_DATA['shotgun']['settings']['project_name']]], ['code'])
+    sequences = sg.find(
+        "Sequence",
+        [
+            [
+                "project.Project.name",
+                "is",
+                CONFIG_DATA["shotgun"]["settings"]["project_name"],
+            ]
+        ],
+        ["code"],
+    )
     for sequence in sequences:
         seqObjs.append(vfxEntities.Sequence(sequence, sg))
 
@@ -112,7 +132,27 @@ def getShotsBySequence(sequenceCode):
     sg = getShotgunHandle()
     shotObjs = []
 
-    sgShots = sg.find("Shot", [['project.Project.name', 'is', CONFIG_DATA['shotgun']['settings']['project_name']], ['sg_sequence.Sequence.code', 'is', sequenceCode]], ['code', 'sg_status_list', 'sg_handle', 'sg_vendor', 'sg_head_in', 'sg_tail_out', 'sg_head_in', 'sg_tail_out'])
+    sgShots = sg.find(
+        "Shot",
+        [
+            [
+                "project.Project.name",
+                "is",
+                CONFIG_DATA["shotgun"]["settings"]["project_name"],
+            ],
+            ["sg_sequence.Sequence.code", "is", sequenceCode],
+        ],
+        [
+            "code",
+            "sg_status_list",
+            "sg_handle",
+            "sg_vendor",
+            "sg_head_in",
+            "sg_tail_out",
+            "sg_head_in",
+            "sg_tail_out",
+        ],
+    )
 
     for shotInfo in sgShots:
         shotObjs.append(vfxEntities.Shot(shotInfo, sg))
@@ -132,7 +172,25 @@ def getShot(shotName, sg):
         vfxClientToolkit.api.entities.Shot: Shot object.
 
     """
-    sgShot = sg.find("Shot", [['project.Project.name', 'is', CONFIG_DATA['shotgun']['settings']['project_name']], ['code', 'is', shotName]], ['code', 'sg_vendor_groups', 'sg_status_list', 'sg_handle', 'sg_head_in', 'sg_tail_out'])
+    sgShot = sg.find(
+        "Shot",
+        [
+            [
+                "project.Project.name",
+                "is",
+                CONFIG_DATA["shotgun"]["settings"]["project_name"],
+            ],
+            ["code", "is", shotName],
+        ],
+        [
+            "code",
+            "sg_vendor_groups",
+            "sg_status_list",
+            "sg_handle",
+            "sg_head_in",
+            "sg_tail_out",
+        ],
+    )
 
     if sgShot != []:
         shotObj = vfxEntities.Shot(sgShot[0], sg)
@@ -155,7 +213,7 @@ def getVersion(name, sg):
     """
     fields = getFields("Shot", sg)
     fields.append("sg_path_to_frames")
-    version = sg.find_one("Version", [['code', 'is', name]], fields)
+    version = sg.find_one("Version", [["code", "is", name]], fields)
     versionObj = vfxEntities.Version(version, sg)
     if version == None:
         return None
@@ -177,7 +235,18 @@ def getVersionsByAttr(attrs, sg):
     """
     fields = getFields("Version", sg)
     versionObjs = []
-    versions = sg.find("Version", [['project.Project.name', 'is', CONFIG_DATA['shotgun']['settings']['project_name']], attrs], fields)
+    versions = sg.find(
+        "Version",
+        [
+            [
+                "project.Project.name",
+                "is",
+                CONFIG_DATA["shotgun"]["settings"]["project_name"],
+            ],
+            attrs,
+        ],
+        fields,
+    )
 
     for version in versions:
         versionObjs.append(vfxEntities.Version(version, sg))
@@ -199,7 +268,18 @@ def getShotsByAttr(attrs, sg):
     """
     fields = getFields("Shot", sg)
     shotObjs = []
-    shots = sg.find("Shot", [['project.Project.name', 'is', CONFIG_DATA['shotgun']['settings']['project_name']], attrs], fields)
+    shots = sg.find(
+        "Shot",
+        [
+            [
+                "project.Project.name",
+                "is",
+                CONFIG_DATA["shotgun"]["settings"]["project_name"],
+            ],
+            attrs,
+        ],
+        fields,
+    )
 
     for shot in shots:
         shotObjs.append(vfxEntities.Shot(shot, sg))
@@ -245,17 +325,19 @@ def createPlaylist(name, versions):
     if matchObj != None:
         name = "{0}_{1}".format(matchObj.groups()[1], matchObj.groups()[0])
 
-    versions_list = [{'type' : 'Version', 'id' : x } for x in versions]
-    project = sgHandle.find("Project", [['name', 'is', CONFIG_DATA['shotgun']['settings']['project_name']]])
+    versions_list = [{"type": "Version", "id": x} for x in versions]
+    project = sgHandle.find(
+        "Project", [["name", "is", CONFIG_DATA["shotgun"]["settings"]["project_name"]]]
+    )
     data = {
-        'project': { 'type' : 'Project' , 'id' : project[0]['id'] } ,
-        'code' : name ,
-        'description' : "" ,
-        'versions' : versions_list ,
-        'sg_date_and_time' : now
-        }
+        "project": {"type": "Project", "id": project[0]["id"]},
+        "code": name,
+        "description": "",
+        "versions": versions_list,
+        "sg_date_and_time": now,
+    }
 
-    playlist = sgHandle.create("Playlist",data)
+    playlist = sgHandle.create("Playlist", data)
     return playlist
 
 
@@ -271,7 +353,18 @@ def getPlate(plateName, sg):
         dict: Shotgun dictionary with entity info.
 
     """
-    sgPlate = sg.find("Plate", [['project.Project.name', 'is', CONFIG_DATA['shotgun']['settings']['projectName']], ['code', 'is', plateName]], ['code'])
+    sgPlate = sg.find(
+        "Plate",
+        [
+            [
+                "project.Project.name",
+                "is",
+                CONFIG_DATA["shotgun"]["settings"]["projectName"],
+            ],
+            ["code", "is", plateName],
+        ],
+        ["code"],
+    )
 
     return sgPlate
 
@@ -290,13 +383,15 @@ def createDeliveryEntity(title, addressedTo, deliveryMethod, sg):
         dict: Shotgun dictionary with entity info.
 
     """
-    project = sg.find("Project", [['name', 'is', CONFIG_DATA['shotgun']['settings']['project_name']]])
+    project = sg.find(
+        "Project", [["name", "is", CONFIG_DATA["shotgun"]["settings"]["project_name"]]]
+    )
     data = {
-            'title': title,
-            'addressings_to': addressedTo,
-            'sg_delivery_method': deliveryMethod,
-            'project': {'type' : 'Project' , 'id' : project[0]['id']}
-            }
+        "title": title,
+        "addressings_to": addressedTo,
+        "sg_delivery_method": deliveryMethod,
+        "project": {"type": "Project", "id": project[0]["id"]},
+    }
     entity = sg.create("Delivery", data)
     return entity
 
@@ -312,10 +407,20 @@ def getAllDeliveries(sg):
         dict: Shotgun dictionary with entity info.
 
     """
-    deliveries = sg.find("Delivery", [['project.Project.name', 'is', CONFIG_DATA['shotgun']['settings']['project_name']]], ['code'])
+    deliveries = sg.find(
+        "Delivery",
+        [
+            [
+                "project.Project.name",
+                "is",
+                CONFIG_DATA["shotgun"]["settings"]["project_name"],
+            ]
+        ],
+        ["code"],
+    )
     indices = []
     for delivery in deliveries:
-        indices.append(delivery['id'])
+        indices.append(delivery["id"])
 
     indices.sort()
     indices.reverse()
@@ -338,7 +443,7 @@ def schemaRead(entityType, fieldName):
     """
     sgHandle = getShotgunHandle()
     schema = sgHandle.schema_field_read(entityType, fieldName)
-    values = schema['sg_status_list']['properties']['display_values']['value']
+    values = schema["sg_status_list"]["properties"]["display_values"]["value"]
 
     return values
 
@@ -356,10 +461,14 @@ def getVendors():
     """
 
     sgHandle = getShotgunHandle()
-    fields = ['id', 'name', "permission_rule_set", "firstname", "lastname", "tags"]
+    fields = ["id", "name", "permission_rule_set", "firstname", "lastname", "tags"]
 
     filters = [
-        ["permission_rule_set", "is", {'id': 13, 'name': 'Vendor', 'type': 'PermissionRuleSet'}]
+        [
+            "permission_rule_set",
+            "is",
+            {"id": 13, "name": "Vendor", "type": "PermissionRuleSet"},
+        ]
     ]
 
     vendors = sgHandle.find("HumanUser", filters, fields)
@@ -370,6 +479,7 @@ def getVendors():
         vendorObjs.append(vfxEntities.Vendor(vendor, sgHandle))
 
     return vendorObjs
+
 
 if __name__ == "__main__":
     print(getVendors()[3].info)

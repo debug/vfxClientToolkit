@@ -3,13 +3,14 @@ from qtpy import QtWidgets, QtCore, QtGui
 import vfxClientToolkit.api.sg as sg
 from vfxClientToolkit.icons import PLUS_ICON, MINUS_ICON
 
+
 def launchRecipientsByVendorUI(uiInstance):
     settings = uiInstance.getParentSettings()
-    groupWidget = GroupDisplayWidget(settings['recipients_by_vendor'], uiInstance)
+    groupWidget = GroupDisplayWidget(settings["recipients_by_vendor"], uiInstance)
     groupWidget.show()
 
-class GroupDisplayWidget(QtWidgets.QDialog):
 
+class GroupDisplayWidget(QtWidgets.QDialog):
     def __init__(self, data, parent):
         QtWidgets.QDialog.__init__(self, parent=parent)
         self.__data = data
@@ -63,7 +64,7 @@ class GroupDisplayWidget(QtWidgets.QDialog):
 
     def __setupSignals(self):
         self.__closeButton.released.connect(self.close)
-        self.__okayButton .released.connect(self.__saveIt)
+        self.__okayButton.released.connect(self.__saveIt)
         self.__minusButton.released.connect(self.__removeRecipient)
         self.__addButton.released.connect(self.__addRecipient)
 
@@ -91,12 +92,15 @@ class GroupDisplayWidget(QtWidgets.QDialog):
 
             if currentItem.parent() == None:
 
-                value, status = QtWidgets.QInputDialog.getText(self, "Add Email Recipient", "Add Email Recipient:")
+                value, status = QtWidgets.QInputDialog.getText(
+                    self, "Add Email Recipient", "Add Email Recipient:"
+                )
                 if status:
                     childItem = QtWidgets.QTreeWidgetItem()
                     childItem.setText(0, value)
                     currentItem.addChild(childItem)
                     currentItem.setExpanded(True)
+
 
 def run():
     app = QtWidgets.QApplication(sys.argv)

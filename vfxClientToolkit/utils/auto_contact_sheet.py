@@ -5,6 +5,7 @@ import os
 
 ROOT = "/Volumes/RSO_3/shot/{seq}/{shot}/img/"
 
+
 def autoContactSheet():
 
     nodeList = []
@@ -23,48 +24,47 @@ def autoContactSheet():
         textNode.setInput(0, node)
 
         # Set the bbox of the text node to match the input format
-        textNode['box'].setValue(0, 0)
-        textNode['box'].setValue(0, 1)
-        textNode['box'].setExpression("input.width", 2)
-        textNode['box'].setExpression("input.height", 3)
-        textNode['xjustify'].setValue("left")
-        textNode['yjustify'].setValue("bottom")
+        textNode["box"].setValue(0, 0)
+        textNode["box"].setValue(0, 1)
+        textNode["box"].setExpression("input.width", 2)
+        textNode["box"].setExpression("input.height", 3)
+        textNode["xjustify"].setValue("left")
+        textNode["yjustify"].setValue("bottom")
 
         # Add relevant label as per the if/else statement above
-        textNode['message'].setValue(textValue)
-        textNode['shadow_opacity'].setValue('1')
-        textNode['label'].setValue('[value message]')
+        textNode["message"].setValue(textValue)
+        textNode["shadow_opacity"].setValue("1")
+        textNode["label"].setValue("[value message]")
 
         # Add selected nodes to a list
         nodeList.append(textNode)
 
         # Add the X and Y position of all selected nodes to their respective lists
-        xVals.append(node['xpos'].value())
-        yVals.append(node['ypos'].value())
-
+        xVals.append(node["xpos"].value())
+        yVals.append(node["ypos"].value())
 
     # Create a contact sheet node. This will come in with the new defaults we set above!
     cs = nuke.createNode("ContactSheet")
 
     # Add better knob defaults to Contact Sheet
-    cs['width'].setExpression("input.width * columns * resMult")
-    cs['height'].setExpression("input.height * rows * resMult")
-    cs['roworder'].setValue("TopBottom")
-    cs['colorder'].setValue("LeftRight")
-    cs['rows'].setExpression("ceil(inputs/columns)")
-    cs['columns'].setExpression("ceil(sqrt(inputs))")
+    cs["width"].setExpression("input.width * columns * resMult")
+    cs["height"].setExpression("input.height * rows * resMult")
+    cs["roworder"].setValue("TopBottom")
+    cs["colorder"].setValue("LeftRight")
+    cs["rows"].setExpression("ceil(inputs/columns)")
+    cs["columns"].setExpression("ceil(sqrt(inputs))")
 
     # Add custom knobs to the User tab to allow some control of our text nodes (User tab is created automatically by Nuke)
-    cs.addKnob(nuke.Text_Knob('',''))
-    cs.addKnob(nuke.Double_Knob('resMult', "Resolution Multiplier"))
-    cs['resMult'].setValue(1)
-    cs.addKnob(nuke.Text_Knob('',''))
-    cs.addKnob(nuke.Boolean_Knob('showText', 'Show Text', True))
+    cs.addKnob(nuke.Text_Knob("", ""))
+    cs.addKnob(nuke.Double_Knob("resMult", "Resolution Multiplier"))
+    cs["resMult"].setValue(1)
+    cs.addKnob(nuke.Text_Knob("", ""))
+    cs.addKnob(nuke.Boolean_Knob("showText", "Show Text", True))
     textBG_ops = "None", "Shadow", "Solid"
-    cs.addKnob(nuke.Enumeration_Knob('textBG', 'Text Background', textBG_ops))
-    cs.addKnob(nuke.Double_Knob('textSize', 'Text Size'))
-    cs['textSize'].setValue(1)
-    cs.addKnob(nuke.Text_Knob('',''))
+    cs.addKnob(nuke.Enumeration_Knob("textBG", "Text Background", textBG_ops))
+    cs.addKnob(nuke.Double_Knob("textSize", "Text Size"))
+    cs["textSize"].setValue(1)
+    cs.addKnob(nuke.Text_Knob("", ""))
 
     iterator = 0
 
@@ -72,10 +72,14 @@ def autoContactSheet():
     for nodes in nodeList:
 
         cs.setInput(iterator, nodes)
-        nodes['enable_background'].setExpression(cs['name'].value()+".textBG == 2 ? 1 : 0")
-        nodes['enable_shadows'].setExpression(cs['name'].value()+".textBG == 1 ? 1 : 0")
-        nodes['disable'].setExpression(cs['name'].value()+".showText == 1 ? 0 : 1")
-        nodes['global_font_scale'].setExpression(cs['name'].value()+".textSize")
+        nodes["enable_background"].setExpression(
+            cs["name"].value() + ".textBG == 2 ? 1 : 0"
+        )
+        nodes["enable_shadows"].setExpression(
+            cs["name"].value() + ".textBG == 1 ? 1 : 0"
+        )
+        nodes["disable"].setExpression(cs["name"].value() + ".showText == 1 ? 0 : 1")
+        nodes["global_font_scale"].setExpression(cs["name"].value() + ".textSize")
 
         iterator = iterator + 1
 
@@ -84,8 +88,9 @@ def autoContactSheet():
     avgYpos = sum(yVals) / len(nodeList)
 
     # Force set the position of our newly created contact sheet in the node graph
-    cs['xpos'].setValue(avgXpos)
-    cs['ypos'].setValue(avgYpos+200)
+    cs["xpos"].setValue(avgXpos)
+    cs["ypos"].setValue(avgYpos + 200)
+
 
 def collectMovies(shots):
     dept = "cmp"
@@ -123,26 +128,28 @@ def collectMovies(shots):
 
     return results
 
+
 def atoi(text):
     return int(text) if text.isdigit() else text
 
+
 def natural_keys(text):
-    return [ atoi(c) for c in re.split(".+v[0-9][0-9][0-9]", text) ]
+    return [atoi(c) for c in re.split(".+v[0-9][0-9][0-9]", text)]
 
 
 if __name__ == "__main__":
-    moo = collectMovies(['apc6190', 'apc6370', 'apc6210'])
+    moo = collectMovies(["apc6190", "apc6370", "apc6210"])
     nodeStack = []
     for shot, item in moo.items():
         read = nuke.createNode("Read")
-        read['file'].setValue(item[0][0])
-        read.knob('selected').setValue(True)
+        read["file"].setValue(item[0][0])
+        read.knob("selected").setValue(True)
         nodeStack.append(read)
 
     for node in nodeStack:
         print(node)
         nuke.toNode(node).setSelected(True)
-        #print(item[0])
-    #print(moo)
+        # print(item[0])
+    # print(moo)
     autoContactSheet()
-    #pass
+    # pass
