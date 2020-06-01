@@ -22,7 +22,7 @@ jobs:
     - name: Black reformatter check
       run: pipenv run black --check .
     - name: mypy
-      run: pipenv run mypy
+      run: pipenv run mypy .
     - name: Lint with flake8
       run: |
         pip install flake8
