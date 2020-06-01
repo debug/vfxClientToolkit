@@ -3,7 +3,7 @@ import logging.handlers
 import os
 import datetime
 from os.path import expanduser
-
+from typing import Dict
 from vfxClientToolkit.constants import CONFIG_DIR
 from vfxClientToolkit import __title__
 
@@ -17,7 +17,7 @@ def getLogDir():
 
 
 class SingletonType(type):
-    _instances = {}
+    _instances: Dict[object, object] = {}
 
     def __call__(cls, *args, **kwargs):
         if cls not in cls._instances:
