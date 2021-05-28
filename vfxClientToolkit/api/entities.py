@@ -265,8 +265,7 @@ class Shot(AbstractEntity):
     def createVersion(
         self, metadata, pathToMov, task, vendor, pathToFrames=None, firstLastFrame=None
     ):
-        """
-        """
+        """"""
         project = self.getProject()
         task = self.getOrCreateTask(task, vendor)
 
