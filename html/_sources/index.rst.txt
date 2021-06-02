@@ -42,5 +42,5 @@ API
 .. toctree::
     :maxdepth: 2
 
-    api/sg
+    api
     api/entities

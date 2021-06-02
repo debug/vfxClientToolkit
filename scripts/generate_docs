@@ -1,0 +1,82 @@
+import os
+import sys
+
+r_path = os.environ['REPO_PATH']
+
+from git import Repo
+from github import Github, InputGitAuthor
+import subprocess
+
+def switch_branch():
+
+    repo = Repo(r_path)
+
+    for head in repo.heads:
+        if head.name == "gh-pages":
+            head.checkout()
+
+def make_docs():
+    doc_path = os.path.join(r_path, "docs")
+    subprocess.call(["make", 'html'], cwd=doc_path)
+
+def commit_files():
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    author_mail = os.environ['AUTHOR_MAIL']
+    access_token = os.environ['ACCESS_TOKEN']
+
+    repo = Repo(r_path)
+
+    project_name = "vfxClientToolkit"
+
+    #os.environ['GIT_AUTHOR_NAME'] = 'debug'
+    #os.environ['GIT_AUTHOR_EMAIL'] = author_mail
+
+#    ssh_cmd = 'ssh -i id_deployment_key'
+
+    #with repo.git.custom_environment(GIT_SSH_COMMAND=access_token):
+    #    repo.remotes.origin.fetch()
+
+#    repo.config_writer().set_value("user", "name", "github-actions").release()
+#    repo.config_writer().set_value("user", "email", "github-actions@github.com").release()
+
+    index = repo.index
+    diff = repo.index.diff(None)
+
+    if diff:
+        for item in diff:
+            index.add(item.a_path)
+
+#    os.system("git remote add origin https://{username}:{password}@github.com/{username}/project.git".format(username="debug", password=access_token))
+
+    repo.git.commit('-m', 'Rebuilt Docs')
+
+    #with repo.git.custom_environment(GIT_SSH_COMMAND=access_token):
+
+#    HTTPS_REMOTE_URL = "https://{access_token}:x-oauth-basic@github.com/{username}/{project_name}".format(access_token=access_token, username="debug", project_name="debug")
+#
+    #with repo.git.custom_environment(GIT_SSH_COMMAND=access_token):
+    #    repo.remotes.origin.push()
+
+if __name__ == "__main__":
+    switch_branch()
+    make_docs()
+    commit_files()
