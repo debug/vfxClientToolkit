@@ -38,6 +38,7 @@ jobs:
       run: |
         pip install PyGithub
         pip install GitPython
+        pip install git+git://github.com/shotgunsoftware/python-api.git
         git checkout gh-pages
         export AUTHOR_MAIL=${{ secrets.AUTHOR_MAIL }}
         export ACCESS_TOKEN=${{ secrets.ACCESS_TOKEN }}
