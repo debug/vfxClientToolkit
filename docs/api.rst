@@ -4,6 +4,6 @@ API
    :maxdepth: 1
    :name: toc-class-ref
 
-.. automodule:: vfxClientToolkit.api.sg
+.. automodule:: vfxClientToolkit.api.entities
    :members:
    
