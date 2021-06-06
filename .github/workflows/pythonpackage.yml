@@ -36,6 +36,7 @@ jobs:
 
     - name: Build docs
       run: |
+        pip install git+git://github.com/debug/vfxClientToolkit.git
         pip install PyGithub
         pip install GitPython
         pip install git+git://github.com/shotgunsoftware/python-api.git
