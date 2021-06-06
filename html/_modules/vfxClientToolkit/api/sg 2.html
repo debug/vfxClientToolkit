@@ -1,0 +1,585 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>vfxClientToolkit.api.sg &mdash; vfxClientToolkit 0.0.2 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> vfxClientToolkit
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction.html#requirements">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction.html#ingest-it">Ingest It</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction.html#notebao">NoteBao</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction.html#mr-film-out">Mr Film Out</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction.html#edl-builder">EDL Builder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction.html#reports">Reports</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction.html#configuration-manager">Configuration Manager</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installing.html">Installing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installing.html#macos">MacOS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installing.html#linux">Linux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installing.html#windows">Windows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../configuration.html">Configuration</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../tools/ingestIt.html">Ingest It</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tools/noteBao.html">NoteBao</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tools/mrFilmOut.html">MrFilmOut</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">API</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">vfxClientToolkit</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>vfxClientToolkit.api.sg</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for vfxClientToolkit.api.sg</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">ssl</span>
+
+<span class="kn">import</span> <span class="nn">shotgun_api3</span>
+<span class="kn">from</span> <span class="nn">vfxClientToolkit.api.config</span> <span class="kn">import</span> <span class="n">ConfigBundle</span>
+<span class="kn">import</span> <span class="nn">vfxClientToolkit.api.entities</span> <span class="k">as</span> <span class="nn">vfxEntities</span>
+
+<span class="n">ssl</span><span class="o">.</span><span class="n">_create_default_https_context</span> <span class="o">=</span> <span class="n">ssl</span><span class="o">.</span><span class="n">_create_unverified_context</span>
+
+<span class="n">cb</span> <span class="o">=</span> <span class="n">ConfigBundle</span><span class="p">()</span>
+<span class="n">CONFIG_DATA</span> <span class="o">=</span> <span class="n">cb</span><span class="o">.</span><span class="n">getContexts</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="getShotgunHandle"><a class="viewcode-back" href="../../../api.html#vfxClientToolkit.api.sg.getShotgunHandle">[docs]</a><span class="k">def</span> <span class="nf">getShotgunHandle</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns `shotgun_api3.Shotgun` object using the API key from the configuration files.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        shotgun_api3.shotgun.Shotgun: Configured Shotgun object.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sg</span> <span class="o">=</span> <span class="n">shotgun_api3</span><span class="o">.</span><span class="n">Shotgun</span><span class="p">(</span><span class="n">CONFIG_DATA</span><span class="p">[</span><span class="s1">&#39;shotgun&#39;</span><span class="p">][</span><span class="s1">&#39;settings&#39;</span><span class="p">][</span><span class="s1">&#39;server&#39;</span><span class="p">],</span>
+         <span class="n">script_name</span><span class="o">=</span><span class="n">CONFIG_DATA</span><span class="p">[</span><span class="s1">&#39;shotgun&#39;</span><span class="p">][</span><span class="s1">&#39;settings&#39;</span><span class="p">][</span><span class="s1">&#39;script_name&#39;</span><span class="p">],</span>
+         <span class="n">api_key</span><span class="o">=</span><span class="n">CONFIG_DATA</span><span class="p">[</span><span class="s1">&#39;shotgun&#39;</span><span class="p">][</span><span class="s1">&#39;settings&#39;</span><span class="p">][</span><span class="s1">&#39;api_key&#39;</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">sg</span></div>
+
+
+<div class="viewcode-block" id="getPlaylists"><a class="viewcode-back" href="../../../api.html#vfxClientToolkit.api.sg.getPlaylists">[docs]</a><span class="k">def</span> <span class="nf">getPlaylists</span><span class="p">(</span><span class="n">sg</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns all playlists based on the show specified in the configuration file(s).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        param1 (shotgun_api3.Shotgun): Shotgun DB Object.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list: List of dictionaries with Shotgun entity information.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sgPlaylists</span> <span class="o">=</span> <span class="n">sg</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;Playlist&quot;</span><span class="p">,</span> <span class="p">[[</span><span class="s1">&#39;project.Project.name&#39;</span><span class="p">,</span> <span class="s1">&#39;is&#39;</span><span class="p">,</span> <span class="n">CONFIG_DATA</span><span class="p">[</span><span class="s1">&#39;shotgun&#39;</span><span class="p">][</span><span class="s1">&#39;settings&#39;</span><span class="p">][</span><span class="s1">&#39;project_name&#39;</span><span class="p">]]],</span> <span class="p">[</span><span class="s1">&#39;code&#39;</span><span class="p">])</span>
+    <span class="n">playlistObjs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">playlist</span> <span class="ow">in</span> <span class="n">sgPlaylists</span><span class="p">:</span>
+        <span class="n">playlistObjs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vfxEntities</span><span class="o">.</span><span class="n">Playlist</span><span class="p">(</span><span class="n">playlist</span><span class="p">,</span> <span class="n">sg</span><span class="p">))</span>
+
+    <span class="n">playlistObjs</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">playlistObjs</span></div>
+
+
+<div class="viewcode-block" id="getProject"><a class="viewcode-back" href="../../../api.html#vfxClientToolkit.api.sg.getProject">[docs]</a><span class="k">def</span> <span class="nf">getProject</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns Shotgun dictionary entity based on defined project in configuration file.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: Shotgun entity information.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sgHandle</span> <span class="o">=</span> <span class="n">getShotgunHandle</span><span class="p">()</span>
+    <span class="n">filters</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;is&#39;</span><span class="p">,</span> <span class="n">CONFIG_DATA</span><span class="p">[</span><span class="s1">&#39;shotgun&#39;</span><span class="p">][</span><span class="s1">&#39;settings&#39;</span><span class="p">][</span><span class="s1">&#39;project_name&#39;</span><span class="p">]]</span>
+    <span class="p">]</span>
+    <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">]</span>
+    <span class="n">sg_project</span> <span class="o">=</span> <span class="n">sgHandle</span><span class="o">.</span><span class="n">find_one</span><span class="p">(</span><span class="s1">&#39;Project&#39;</span><span class="p">,</span> <span class="n">filters</span><span class="p">,</span> <span class="n">fields</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">sg_project</span></div>
+
+
+<div class="viewcode-block" id="getSequences"><a class="viewcode-back" href="../../../api.html#vfxClientToolkit.api.sg.getSequences">[docs]</a><span class="k">def</span> <span class="nf">getSequences</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Collects and returns all sequences from the configured Shotgun projet.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list: List of `vfxClientToolkit.api.entities.Sequence` objects.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">seqObjs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">sg</span> <span class="o">=</span> <span class="n">getShotgunHandle</span><span class="p">()</span>
+
+    <span class="n">sequences</span> <span class="o">=</span> <span class="n">sg</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;Sequence&quot;</span><span class="p">,</span> <span class="p">[[</span><span class="s1">&#39;project.Project.name&#39;</span><span class="p">,</span> <span class="s1">&#39;is&#39;</span><span class="p">,</span> <span class="n">CONFIG_DATA</span><span class="p">[</span><span class="s1">&#39;shotgun&#39;</span><span class="p">][</span><span class="s1">&#39;settings&#39;</span><span class="p">][</span><span class="s1">&#39;project_name&#39;</span><span class="p">]]],</span> <span class="p">[</span><span class="s1">&#39;code&#39;</span><span class="p">])</span>
+    <span class="k">for</span> <span class="n">sequence</span> <span class="ow">in</span> <span class="n">sequences</span><span class="p">:</span>
+        <span class="n">seqObjs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vfxEntities</span><span class="o">.</span><span class="n">Sequence</span><span class="p">(</span><span class="n">sequence</span><span class="p">,</span> <span class="n">sg</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">seqObjs</span></div>
+
+
+<div class="viewcode-block" id="getSequence"><a class="viewcode-back" href="../../../api.html#vfxClientToolkit.api.sg.getSequence">[docs]</a><span class="k">def</span> <span class="nf">getSequence</span><span class="p">(</span><span class="n">sequenceName</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns sequence object based upon specified name.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        param1 (str): Name of sequence.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        vfxClientToolkit.api.entities.Sequence: Sequence object that matches provided name.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">sequence</span> <span class="ow">in</span> <span class="n">getSequences</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">sequence</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">sequenceName</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">sequence</span></div>
+
+
+<div class="viewcode-block" id="getShotsBySequence"><a class="viewcode-back" href="../../../api.html#vfxClientToolkit.api.sg.getShotsBySequence">[docs]</a><span class="k">def</span> <span class="nf">getShotsBySequence</span><span class="p">(</span><span class="n">sequenceCode</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Collects and returns list of `vfxClientToolkit.api.entities.Shot` objects that below to provided sequence name.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        param1 (str): Name of sequence.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list: List of Shot entities.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sg</span> <span class="o">=</span> <span class="n">getShotgunHandle</span><span class="p">()</span>
+    <span class="n">shotObjs</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">sgShots</span> <span class="o">=</span> <span class="n">sg</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;Shot&quot;</span><span class="p">,</span> <span class="p">[[</span><span class="s1">&#39;project.Project.name&#39;</span><span class="p">,</span> <span class="s1">&#39;is&#39;</span><span class="p">,</span> <span class="n">CONFIG_DATA</span><span class="p">[</span><span class="s1">&#39;shotgun&#39;</span><span class="p">][</span><span class="s1">&#39;settings&#39;</span><span class="p">][</span><span class="s1">&#39;project_name&#39;</span><span class="p">]],</span> <span class="p">[</span><span class="s1">&#39;sg_sequence.Sequence.code&#39;</span><span class="p">,</span> <span class="s1">&#39;is&#39;</span><span class="p">,</span> <span class="n">sequenceCode</span><span class="p">]],</span> <span class="p">[</span><span class="s1">&#39;code&#39;</span><span class="p">,</span> <span class="s1">&#39;sg_status_list&#39;</span><span class="p">,</span> <span class="s1">&#39;sg_handle&#39;</span><span class="p">,</span> <span class="s1">&#39;sg_vendor&#39;</span><span class="p">,</span> <span class="s1">&#39;sg_head_in&#39;</span><span class="p">,</span> <span class="s1">&#39;sg_tail_out&#39;</span><span class="p">,</span> <span class="s1">&#39;sg_head_in&#39;</span><span class="p">,</span> <span class="s1">&#39;sg_tail_out&#39;</span><span class="p">])</span>
+
+    <span class="k">for</span> <span class="n">shotInfo</span> <span class="ow">in</span> <span class="n">sgShots</span><span class="p">:</span>
+        <span class="n">shotObjs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vfxEntities</span><span class="o">.</span><span class="n">Shot</span><span class="p">(</span><span class="n">shotInfo</span><span class="p">,</span> <span class="n">sg</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">shotObjs</span></div>
+
+
+<div class="viewcode-block" id="getShot"><a class="viewcode-back" href="../../../api.html#vfxClientToolkit.api.sg.getShot">[docs]</a><span class="k">def</span> <span class="nf">getShot</span><span class="p">(</span><span class="n">shotName</span><span class="p">,</span> <span class="n">sg</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Collects and returns `vfxClientToolkit.api.entities.Shot` object.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        param1 (str): Name of shot.</span>
+<span class="sd">        param2 (shotgun_api3.shotgun.Shotgun): Shotgun handle.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        vfxClientToolkit.api.entities.Shot: Shot object.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sgShot</span> <span class="o">=</span> <span class="n">sg</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;Shot&quot;</span><span class="p">,</span> <span class="p">[[</span><span class="s1">&#39;project.Project.name&#39;</span><span class="p">,</span> <span class="s1">&#39;is&#39;</span><span class="p">,</span> <span class="n">CONFIG_DATA</span><span class="p">[</span><span class="s1">&#39;shotgun&#39;</span><span class="p">][</span><span class="s1">&#39;settings&#39;</span><span class="p">][</span><span class="s1">&#39;project_name&#39;</span><span class="p">]],</span> <span class="p">[</span><span class="s1">&#39;code&#39;</span><span class="p">,</span> <span class="s1">&#39;is&#39;</span><span class="p">,</span> <span class="n">shotName</span><span class="p">]],</span> <span class="p">[</span><span class="s1">&#39;code&#39;</span><span class="p">,</span> <span class="s1">&#39;sg_vendor_groups&#39;</span><span class="p">,</span> <span class="s1">&#39;sg_status_list&#39;</span><span class="p">,</span> <span class="s1">&#39;sg_handle&#39;</span><span class="p">,</span> <span class="s1">&#39;sg_head_in&#39;</span><span class="p">,</span> <span class="s1">&#39;sg_tail_out&#39;</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="n">sgShot</span> <span class="o">!=</span> <span class="p">[]:</span>
+        <span class="n">shotObj</span> <span class="o">=</span> <span class="n">vfxEntities</span><span class="o">.</span><span class="n">Shot</span><span class="p">(</span><span class="n">sgShot</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">sg</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">shotObj</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="getVersion"><a class="viewcode-back" href="../../../api.html#vfxClientToolkit.api.sg.getVersion">[docs]</a><span class="k">def</span> <span class="nf">getVersion</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">sg</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Collects and returns `vfxClientToolkit.api.entities.Version` object.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        param1 (str): Name of version.</span>
+<span class="sd">        param2 (shotgun_api3.shotgun.Shotgun): Shotgun handle.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        vfxClientToolkit.api.entities.Version: Version object.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">fields</span> <span class="o">=</span> <span class="n">getFields</span><span class="p">(</span><span class="s2">&quot;Shot&quot;</span><span class="p">,</span> <span class="n">sg</span><span class="p">)</span>
+    <span class="n">fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;sg_path_to_frames&quot;</span><span class="p">)</span>
+    <span class="n">version</span> <span class="o">=</span> <span class="n">sg</span><span class="o">.</span><span class="n">find_one</span><span class="p">(</span><span class="s2">&quot;Version&quot;</span><span class="p">,</span> <span class="p">[[</span><span class="s1">&#39;code&#39;</span><span class="p">,</span> <span class="s1">&#39;is&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">]],</span> <span class="n">fields</span><span class="p">)</span>
+    <span class="n">versionObj</span> <span class="o">=</span> <span class="n">vfxEntities</span><span class="o">.</span><span class="n">Version</span><span class="p">(</span><span class="n">version</span><span class="p">,</span> <span class="n">sg</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">version</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">versionObj</span></div>
+
+
+<div class="viewcode-block" id="getVersionsByAttr"><a class="viewcode-back" href="../../../api.html#vfxClientToolkit.api.sg.getVersionsByAttr">[docs]</a><span class="k">def</span> <span class="nf">getVersionsByAttr</span><span class="p">(</span><span class="n">attrs</span><span class="p">,</span> <span class="n">sg</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns list of `vfxClientToolkit.api.entities.Version` objects that match the attribute filter provided.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        param1 (list): Filter attribute.</span>
+<span class="sd">        param2 (shotgun_api3.shotgun.Shotgun): Shotgun handle.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list: Version objects in list that match filter criteria.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">fields</span> <span class="o">=</span> <span class="n">getFields</span><span class="p">(</span><span class="s2">&quot;Version&quot;</span><span class="p">,</span> <span class="n">sg</span><span class="p">)</span>
+    <span class="n">versionObjs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">versions</span> <span class="o">=</span> <span class="n">sg</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;Version&quot;</span><span class="p">,</span> <span class="p">[[</span><span class="s1">&#39;project.Project.name&#39;</span><span class="p">,</span> <span class="s1">&#39;is&#39;</span><span class="p">,</span> <span class="n">CONFIG_DATA</span><span class="p">[</span><span class="s1">&#39;shotgun&#39;</span><span class="p">][</span><span class="s1">&#39;settings&#39;</span><span class="p">][</span><span class="s1">&#39;project_name&#39;</span><span class="p">]],</span> <span class="n">attrs</span><span class="p">],</span> <span class="n">fields</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">version</span> <span class="ow">in</span> <span class="n">versions</span><span class="p">:</span>
+        <span class="n">versionObjs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vfxEntities</span><span class="o">.</span><span class="n">Version</span><span class="p">(</span><span class="n">version</span><span class="p">,</span> <span class="n">sg</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">versionObjs</span></div>
+
+
+<div class="viewcode-block" id="getShotsByAttr"><a class="viewcode-back" href="../../../api.html#vfxClientToolkit.api.sg.getShotsByAttr">[docs]</a><span class="k">def</span> <span class="nf">getShotsByAttr</span><span class="p">(</span><span class="n">attrs</span><span class="p">,</span> <span class="n">sg</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns list of `vfxClientToolkit.api.entities.Version` objects that match the attribute filter provided.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        param1 (list): Filter attribute.</span>
+<span class="sd">        param2 (shotgun_api3.shotgun.Shotgun): Shotgun handle.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list: Version objects in list that match filter criteria.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">fields</span> <span class="o">=</span> <span class="n">getFields</span><span class="p">(</span><span class="s2">&quot;Shot&quot;</span><span class="p">,</span> <span class="n">sg</span><span class="p">)</span>
+    <span class="n">shotObjs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">shots</span> <span class="o">=</span> <span class="n">sg</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;Shot&quot;</span><span class="p">,</span> <span class="p">[[</span><span class="s1">&#39;project.Project.name&#39;</span><span class="p">,</span> <span class="s1">&#39;is&#39;</span><span class="p">,</span> <span class="n">CONFIG_DATA</span><span class="p">[</span><span class="s1">&#39;shotgun&#39;</span><span class="p">][</span><span class="s1">&#39;settings&#39;</span><span class="p">][</span><span class="s1">&#39;project_name&#39;</span><span class="p">]],</span> <span class="n">attrs</span><span class="p">],</span> <span class="n">fields</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">shot</span> <span class="ow">in</span> <span class="n">shots</span><span class="p">:</span>
+        <span class="n">shotObjs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vfxEntities</span><span class="o">.</span><span class="n">Shot</span><span class="p">(</span><span class="n">shot</span><span class="p">,</span> <span class="n">sg</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">shotObjs</span></div>
+
+
+<div class="viewcode-block" id="getFields"><a class="viewcode-back" href="../../../api.html#vfxClientToolkit.api.sg.getFields">[docs]</a><span class="k">def</span> <span class="nf">getFields</span><span class="p">(</span><span class="n">entityName</span><span class="p">,</span> <span class="n">sg</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns list of entity attributes based on the provided entity type.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        param1 (str): Entity name.</span>
+<span class="sd">        param2 (shotgun_api3.shotgun.Shotgun): Shotgun handle.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list: List of entity attributes.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">allFields</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">fields</span> <span class="o">=</span> <span class="n">sg</span><span class="o">.</span><span class="n">schema_field_read</span><span class="p">(</span><span class="n">entityName</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">:</span>
+        <span class="n">allFields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">field</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">allFields</span></div>
+
+
+<div class="viewcode-block" id="createPlaylist"><a class="viewcode-back" href="../../../api.html#vfxClientToolkit.api.sg.createPlaylist">[docs]</a><span class="k">def</span> <span class="nf">createPlaylist</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">versions</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates playlist and adds provided versions to newly created list.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        param1 (str): Name of playlist (note: this should have the date provided in the following notation YYYYMMDD).</span>
+<span class="sd">        param2 (list): List of `vfxClientToolkit.api.entities.Version` objects.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        vfxClientToolkit.api.entities.Playlist: Newly created playlist object.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sgHandle</span> <span class="o">=</span> <span class="n">getShotgunHandle</span><span class="p">()</span>
+    <span class="n">now</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+
+    <span class="n">matchObj</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">),</span> <span class="s2">&quot;([0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9])_(.+)&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">matchObj</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{0}</span><span class="s2">_</span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">matchObj</span><span class="o">.</span><span class="n">groups</span><span class="p">()[</span><span class="mi">1</span><span class="p">],</span> <span class="n">matchObj</span><span class="o">.</span><span class="n">groups</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="n">versions_list</span> <span class="o">=</span> <span class="p">[{</span><span class="s1">&#39;type&#39;</span> <span class="p">:</span> <span class="s1">&#39;Version&#39;</span><span class="p">,</span> <span class="s1">&#39;id&#39;</span> <span class="p">:</span> <span class="n">x</span> <span class="p">}</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">versions</span><span class="p">]</span>
+    <span class="n">project</span> <span class="o">=</span> <span class="n">sgHandle</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;Project&quot;</span><span class="p">,</span> <span class="p">[[</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;is&#39;</span><span class="p">,</span> <span class="n">CONFIG_DATA</span><span class="p">[</span><span class="s1">&#39;shotgun&#39;</span><span class="p">][</span><span class="s1">&#39;settings&#39;</span><span class="p">][</span><span class="s1">&#39;project_name&#39;</span><span class="p">]]])</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;project&#39;</span><span class="p">:</span> <span class="p">{</span> <span class="s1">&#39;type&#39;</span> <span class="p">:</span> <span class="s1">&#39;Project&#39;</span> <span class="p">,</span> <span class="s1">&#39;id&#39;</span> <span class="p">:</span> <span class="n">project</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;id&#39;</span><span class="p">]</span> <span class="p">}</span> <span class="p">,</span>
+        <span class="s1">&#39;code&#39;</span> <span class="p">:</span> <span class="n">name</span> <span class="p">,</span>
+        <span class="s1">&#39;description&#39;</span> <span class="p">:</span> <span class="s2">&quot;&quot;</span> <span class="p">,</span>
+        <span class="s1">&#39;versions&#39;</span> <span class="p">:</span> <span class="n">versions_list</span> <span class="p">,</span>
+        <span class="s1">&#39;sg_date_and_time&#39;</span> <span class="p">:</span> <span class="n">now</span>
+        <span class="p">}</span>
+
+    <span class="n">playlist</span> <span class="o">=</span> <span class="n">sgHandle</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="s2">&quot;Playlist&quot;</span><span class="p">,</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">playlist</span></div>
+
+
+<div class="viewcode-block" id="getPlate"><a class="viewcode-back" href="../../../api.html#vfxClientToolkit.api.sg.getPlate">[docs]</a><span class="k">def</span> <span class="nf">getPlate</span><span class="p">(</span><span class="n">plateName</span><span class="p">,</span> <span class="n">sg</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Collects plate from Shotgun.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        param1 (str): Plate name.</span>
+<span class="sd">        param2 (shotgun_api3.shotgun.Shotgun): Shotgun handle.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: Shotgun dictionary with entity info.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sgPlate</span> <span class="o">=</span> <span class="n">sg</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;Plate&quot;</span><span class="p">,</span> <span class="p">[[</span><span class="s1">&#39;project.Project.name&#39;</span><span class="p">,</span> <span class="s1">&#39;is&#39;</span><span class="p">,</span> <span class="n">CONFIG_DATA</span><span class="p">[</span><span class="s1">&#39;shotgun&#39;</span><span class="p">][</span><span class="s1">&#39;settings&#39;</span><span class="p">][</span><span class="s1">&#39;projectName&#39;</span><span class="p">]],</span> <span class="p">[</span><span class="s1">&#39;code&#39;</span><span class="p">,</span> <span class="s1">&#39;is&#39;</span><span class="p">,</span> <span class="n">plateName</span><span class="p">]],</span> <span class="p">[</span><span class="s1">&#39;code&#39;</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">sgPlate</span></div>
+
+
+<div class="viewcode-block" id="createDeliveryEntity"><a class="viewcode-back" href="../../../api.html#vfxClientToolkit.api.sg.createDeliveryEntity">[docs]</a><span class="k">def</span> <span class="nf">createDeliveryEntity</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">addressedTo</span><span class="p">,</span> <span class="n">deliveryMethod</span><span class="p">,</span> <span class="n">sg</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates delivery entitiy in Shotgun.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        param1 (str): Delivery title.</span>
+<span class="sd">        param2 (str):shotgun.Shotgun): Addressed to.</span>
+<span class="sd">        param3 (str): Delivery method.</span>
+<span class="sd">        param4 (shotgun_api3.shotgun.Shotgun): Shotgun handle.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: Shotgun dictionary with entity info.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">project</span> <span class="o">=</span> <span class="n">sg</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;Project&quot;</span><span class="p">,</span> <span class="p">[[</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;is&#39;</span><span class="p">,</span> <span class="n">CONFIG_DATA</span><span class="p">[</span><span class="s1">&#39;shotgun&#39;</span><span class="p">][</span><span class="s1">&#39;settings&#39;</span><span class="p">][</span><span class="s1">&#39;project_name&#39;</span><span class="p">]]])</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="n">title</span><span class="p">,</span>
+            <span class="s1">&#39;addressings_to&#39;</span><span class="p">:</span> <span class="n">addressedTo</span><span class="p">,</span>
+            <span class="s1">&#39;sg_delivery_method&#39;</span><span class="p">:</span> <span class="n">deliveryMethod</span><span class="p">,</span>
+            <span class="s1">&#39;project&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;type&#39;</span> <span class="p">:</span> <span class="s1">&#39;Project&#39;</span> <span class="p">,</span> <span class="s1">&#39;id&#39;</span> <span class="p">:</span> <span class="n">project</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;id&#39;</span><span class="p">]}</span>
+            <span class="p">}</span>
+    <span class="n">entity</span> <span class="o">=</span> <span class="n">sg</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="s2">&quot;Delivery&quot;</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">entity</span></div>
+
+
+<div class="viewcode-block" id="getAllDeliveries"><a class="viewcode-back" href="../../../api.html#vfxClientToolkit.api.sg.getAllDeliveries">[docs]</a><span class="k">def</span> <span class="nf">getAllDeliveries</span><span class="p">(</span><span class="n">sg</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns all delivery entities in Shotgun.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        param1 (shotgun_api3.shotgun.Shotgun): Shotgun handle.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: Shotgun dictionary with entity info.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">deliveries</span> <span class="o">=</span> <span class="n">sg</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;Delivery&quot;</span><span class="p">,</span> <span class="p">[[</span><span class="s1">&#39;project.Project.name&#39;</span><span class="p">,</span> <span class="s1">&#39;is&#39;</span><span class="p">,</span> <span class="n">CONFIG_DATA</span><span class="p">[</span><span class="s1">&#39;shotgun&#39;</span><span class="p">][</span><span class="s1">&#39;settings&#39;</span><span class="p">][</span><span class="s1">&#39;project_name&#39;</span><span class="p">]]],</span> <span class="p">[</span><span class="s1">&#39;code&#39;</span><span class="p">])</span>
+    <span class="n">indices</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">delivery</span> <span class="ow">in</span> <span class="n">deliveries</span><span class="p">:</span>
+        <span class="n">indices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">delivery</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span>
+
+    <span class="n">indices</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+    <span class="n">indices</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">indices</span> <span class="o">==</span> <span class="p">[]:</span>
+        <span class="k">return</span> <span class="mi">1</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="schemaRead"><a class="viewcode-back" href="../../../api.html#vfxClientToolkit.api.sg.schemaRead">[docs]</a><span class="k">def</span> <span class="nf">schemaRead</span><span class="p">(</span><span class="n">entityType</span><span class="p">,</span> <span class="n">fieldName</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns all delivery entities in Shotgun.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        param1 (shotgun_api3.shotgun.Shotgun): Shotgun handle.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: Shotgun dictionary with entity info.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sgHandle</span> <span class="o">=</span> <span class="n">getShotgunHandle</span><span class="p">()</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">sgHandle</span><span class="o">.</span><span class="n">schema_field_read</span><span class="p">(</span><span class="n">entityType</span><span class="p">,</span> <span class="n">fieldName</span><span class="p">)</span>
+    <span class="n">values</span> <span class="o">=</span> <span class="n">schema</span><span class="p">[</span><span class="s1">&#39;sg_status_list&#39;</span><span class="p">][</span><span class="s1">&#39;properties&#39;</span><span class="p">][</span><span class="s1">&#39;display_values&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">values</span></div>
+
+
+<div class="viewcode-block" id="getVendors"><a class="viewcode-back" href="../../../api.html#vfxClientToolkit.api.sg.getVendors">[docs]</a><span class="k">def</span> <span class="nf">getVendors</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns all delivery entities in Shotgun.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        param1 (shotgun_api3.shotgun.Shotgun): Shotgun handle.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: Shotgun dictionary with entity info.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">sgHandle</span> <span class="o">=</span> <span class="n">getShotgunHandle</span><span class="p">()</span>
+    <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s2">&quot;permission_rule_set&quot;</span><span class="p">,</span> <span class="s2">&quot;firstname&quot;</span><span class="p">,</span> <span class="s2">&quot;lastname&quot;</span><span class="p">,</span> <span class="s2">&quot;tags&quot;</span><span class="p">]</span>
+
+    <span class="n">filters</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">[</span><span class="s2">&quot;permission_rule_set&quot;</span><span class="p">,</span> <span class="s2">&quot;is&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="mi">13</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;Vendor&#39;</span><span class="p">,</span> <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;PermissionRuleSet&#39;</span><span class="p">}]</span>
+    <span class="p">]</span>
+
+    <span class="n">vendors</span> <span class="o">=</span> <span class="n">sgHandle</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;HumanUser&quot;</span><span class="p">,</span> <span class="n">filters</span><span class="p">,</span> <span class="n">fields</span><span class="p">)</span>
+
+    <span class="n">vendorObjs</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">vendor</span> <span class="ow">in</span> <span class="n">vendors</span><span class="p">:</span>
+        <span class="n">vendorObjs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vfxEntities</span><span class="o">.</span><span class="n">Vendor</span><span class="p">(</span><span class="n">vendor</span><span class="p">,</span> <span class="n">sgHandle</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">vendorObjs</span></div>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">getVendors</span><span class="p">()[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">info</span><span class="p">)</span>
+    <span class="k">pass</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, Dom Drane
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
