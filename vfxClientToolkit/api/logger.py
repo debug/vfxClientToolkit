@@ -2,9 +2,11 @@ import logging
 import logging.handlers
 import os
 import datetime
-#from os.path import expanduser
+
+# from os.path import expanduser
 from typing import Dict
-#from vfxClientToolkit.constants import CONFIG_DIR
+
+# from vfxClientToolkit.constants import CONFIG_DIR
 from vfxClientToolkit import __title__
 import tempfile
 
