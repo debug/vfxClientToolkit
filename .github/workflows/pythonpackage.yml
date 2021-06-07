@@ -36,26 +36,25 @@ jobs:
 
     - name: Build docs
       run: |
-        #pip install git+git://github.com/debug/vfxClientToolkit.git
-        #pip install PyGithub
-        #pip install GitPython
-        #pip install git+git://github.com/shotgunsoftware/python-api.git
-        python -c "import vfxClientToolkit.api.entities"
-        #git checkout gh-pages
-        #export AUTHOR_MAIL=${{ secrets.AUTHOR_MAIL }}
-        #export ACCESS_TOKEN=${{ secrets.ACCESS_TOKEN }}
-        #export REPO_PATH=$PWD
-        #echo $AUTHOR_MAIL
-        #git remote remove origin
-        #git remote add origin https://debug:$ACCESS_TOKEN@github.com/debug/vfxClientToolkit.git
-        #cd docs
-        #pwd
-        #make html
-        #cd ../scripts
-        #date > generated.txt
-        #git config user.name debug
-        #git config user.email AUTHOR_MAIL
-        #git add .
-        #git commit -m "generated"
-        #python generate_docs
-        #git push --set-upstream origin gh-pages
+        pip install git+git://github.com/debug/vfxClientToolkit.git
+        pip install PyGithub
+        pip install GitPython
+        pip install git+git://github.com/shotgunsoftware/python-api.git
+        git checkout gh-pages
+        export AUTHOR_MAIL=${{ secrets.AUTHOR_MAIL }}
+        export ACCESS_TOKEN=${{ secrets.ACCESS_TOKEN }}
+        export REPO_PATH=$PWD
+        echo $AUTHOR_MAIL
+        git remote remove origin
+        git remote add origin https://debug:$ACCESS_TOKEN@github.com/debug/vfxClientToolkit.git
+        cd docs
+        pwd
+        make html
+        cd ../scripts
+        date > generated.txt
+        git config user.name debug
+        git config user.email AUTHOR_MAIL
+        git add .
+        git commit -m "generated"
+        python generate_docs
+        git push --set-upstream origin gh-pages

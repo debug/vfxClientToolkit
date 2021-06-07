@@ -2,18 +2,20 @@ import logging
 import logging.handlers
 import os
 import datetime
-from os.path import expanduser
+#from os.path import expanduser
 from typing import Dict
-from vfxClientToolkit.constants import CONFIG_DIR
+#from vfxClientToolkit.constants import CONFIG_DIR
 from vfxClientToolkit import __title__
+import tempfile
 
 
-def getLogDir():
-    logDir = os.path.join(expanduser("~"), CONFIG_DIR, "logs")
-    if os.path.exists(logDir) == False:
-        os.mkdir(logDir)
+def get_log_dir():
+    temp_dir = tempfile.gettempdir()
+    log_dir = os.path.join(temp_dir, "logs")
+    if os.path.exists(log_dir) == False:
+        os.mkdir(log_dir)
 
-    return logDir
+    return log_dir
 
 
 class SingletonType(type):
@@ -38,7 +40,7 @@ class CustomLogger(object, metaclass=SingletonType):
 
         now = datetime.datetime.now()
         # TODO fix this!
-        dirname = getLogDir()
+        dirname = get_log_dir()
         if not os.path.isdir(dirname):
             os.mkdir(dirname)
         fileHandler = logging.handlers.RotatingFileHandler(
