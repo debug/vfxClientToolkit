@@ -51,10 +51,8 @@ jobs:
         pwd
         make html
         cd ../scripts
-        date > generated.txt
         git config user.name debug
         git config user.email AUTHOR_MAIL
         git add .
-        git commit -m "generated"
         python generate_docs
         git push --set-upstream origin gh-pages
