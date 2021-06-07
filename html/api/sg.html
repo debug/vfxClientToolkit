@@ -1,0 +1,437 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>api.sg &mdash; vfxClientToolkit 0.0.2 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="api.entities" href="entities.html" />
+    <link rel="prev" title="MrFilmOut" href="../tools/mrFilmOut.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> vfxClientToolkit
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html#requirements">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html#ingest-it">Ingest It</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html#notebao">NoteBao</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html#mr-film-out">Mr Film Out</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html#edl-builder">EDL Builder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html#reports">Reports</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html#configuration-manager">Configuration Manager</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installing.html">Installing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installing.html#macos">MacOS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installing.html#linux">Linux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installing.html#windows">Windows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../configuration.html">Configuration</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tools/ingestIt.html">Ingest It</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tools/noteBao.html">NoteBao</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tools/mrFilmOut.html">MrFilmOut</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">api.sg</a><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="entities.html">api.entities</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">vfxClientToolkit</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>api.sg</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/api/sg.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="api-sg">
+<h1>api.sg<a class="headerlink" href="#api-sg" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound" id="toc-class-ref">
+</div>
+<span class="target" id="module-vfxClientToolkit.api.sg"></span><dl class="function">
+<dt id="vfxClientToolkit.api.sg.createDeliveryEntity">
+<code class="sig-prename descclassname">vfxClientToolkit.api.sg.</code><code class="sig-name descname">createDeliveryEntity</code><span class="sig-paren">(</span><em class="sig-param">title</em>, <em class="sig-param">addressedTo</em>, <em class="sig-param">deliveryMethod</em>, <em class="sig-param">sg</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vfxClientToolkit/api/sg.html#createDeliveryEntity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vfxClientToolkit.api.sg.createDeliveryEntity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates delivery entitiy in Shotgun.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>param1 (str): Delivery title.
+param2 (str):shotgun.Shotgun): Addressed to.
+param3 (str): Delivery method.
+param4 (shotgun_api3.shotgun.Shotgun): Shotgun handle.</p>
+</dd>
+<dt>Returns:</dt><dd><p>dict: Shotgun dictionary with entity info.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="vfxClientToolkit.api.sg.createPlaylist">
+<code class="sig-prename descclassname">vfxClientToolkit.api.sg.</code><code class="sig-name descname">createPlaylist</code><span class="sig-paren">(</span><em class="sig-param">name</em>, <em class="sig-param">versions</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vfxClientToolkit/api/sg.html#createPlaylist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vfxClientToolkit.api.sg.createPlaylist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates playlist and adds provided versions to newly created list.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>param1 (str): Name of playlist (note: this should have the date provided in the following notation YYYYMMDD).
+param2 (list): List of <cite>vfxClientToolkit.api.entities.Version</cite> objects.</p>
+</dd>
+<dt>Returns:</dt><dd><p>vfxClientToolkit.api.entities.Playlist: Newly created playlist object.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="vfxClientToolkit.api.sg.getAllDeliveries">
+<code class="sig-prename descclassname">vfxClientToolkit.api.sg.</code><code class="sig-name descname">getAllDeliveries</code><span class="sig-paren">(</span><em class="sig-param">sg</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vfxClientToolkit/api/sg.html#getAllDeliveries"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vfxClientToolkit.api.sg.getAllDeliveries" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns all delivery entities in Shotgun.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>param1 (shotgun_api3.shotgun.Shotgun): Shotgun handle.</p>
+</dd>
+<dt>Returns:</dt><dd><p>dict: Shotgun dictionary with entity info.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="vfxClientToolkit.api.sg.getFields">
+<code class="sig-prename descclassname">vfxClientToolkit.api.sg.</code><code class="sig-name descname">getFields</code><span class="sig-paren">(</span><em class="sig-param">entityName</em>, <em class="sig-param">sg</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vfxClientToolkit/api/sg.html#getFields"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vfxClientToolkit.api.sg.getFields" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns list of entity attributes based on the provided entity type.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>param1 (str): Entity name.
+param2 (shotgun_api3.shotgun.Shotgun): Shotgun handle.</p>
+</dd>
+<dt>Returns:</dt><dd><p>list: List of entity attributes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="vfxClientToolkit.api.sg.getPlate">
+<code class="sig-prename descclassname">vfxClientToolkit.api.sg.</code><code class="sig-name descname">getPlate</code><span class="sig-paren">(</span><em class="sig-param">plateName</em>, <em class="sig-param">sg</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vfxClientToolkit/api/sg.html#getPlate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vfxClientToolkit.api.sg.getPlate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Collects plate from Shotgun.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>param1 (str): Plate name.
+param2 (shotgun_api3.shotgun.Shotgun): Shotgun handle.</p>
+</dd>
+<dt>Returns:</dt><dd><p>dict: Shotgun dictionary with entity info.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="vfxClientToolkit.api.sg.getPlaylists">
+<code class="sig-prename descclassname">vfxClientToolkit.api.sg.</code><code class="sig-name descname">getPlaylists</code><span class="sig-paren">(</span><em class="sig-param">sg</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vfxClientToolkit/api/sg.html#getPlaylists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vfxClientToolkit.api.sg.getPlaylists" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns all playlists based on the show specified in the configuration file(s).</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>param1 (shotgun_api3.Shotgun): Shotgun DB Object.</p>
+</dd>
+<dt>Returns:</dt><dd><p>list: List of dictionaries with Shotgun entity information.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="vfxClientToolkit.api.sg.getProject">
+<code class="sig-prename descclassname">vfxClientToolkit.api.sg.</code><code class="sig-name descname">getProject</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vfxClientToolkit/api/sg.html#getProject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vfxClientToolkit.api.sg.getProject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns Shotgun dictionary entity based on defined project in configuration file.</p>
+<dl class="simple">
+<dt>Returns:</dt><dd><p>dict: Shotgun entity information.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="vfxClientToolkit.api.sg.getSequence">
+<code class="sig-prename descclassname">vfxClientToolkit.api.sg.</code><code class="sig-name descname">getSequence</code><span class="sig-paren">(</span><em class="sig-param">sequenceName</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vfxClientToolkit/api/sg.html#getSequence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vfxClientToolkit.api.sg.getSequence" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns sequence object based upon specified name.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>param1 (str): Name of sequence.</p>
+</dd>
+<dt>Returns:</dt><dd><p>vfxClientToolkit.api.entities.Sequence: Sequence object that matches provided name.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="vfxClientToolkit.api.sg.getSequences">
+<code class="sig-prename descclassname">vfxClientToolkit.api.sg.</code><code class="sig-name descname">getSequences</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vfxClientToolkit/api/sg.html#getSequences"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vfxClientToolkit.api.sg.getSequences" title="Permalink to this definition">¶</a></dt>
+<dd><p>Collects and returns all sequences from the configured Shotgun projet.</p>
+<dl class="simple">
+<dt>Returns:</dt><dd><p>list: List of <cite>vfxClientToolkit.api.entities.Sequence</cite> objects.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="vfxClientToolkit.api.sg.getShot">
+<code class="sig-prename descclassname">vfxClientToolkit.api.sg.</code><code class="sig-name descname">getShot</code><span class="sig-paren">(</span><em class="sig-param">shotName</em>, <em class="sig-param">sg</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vfxClientToolkit/api/sg.html#getShot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vfxClientToolkit.api.sg.getShot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Collects and returns <cite>vfxClientToolkit.api.entities.Shot</cite> object.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>param1 (str): Name of shot.
+param2 (shotgun_api3.shotgun.Shotgun): Shotgun handle.</p>
+</dd>
+<dt>Returns:</dt><dd><p>vfxClientToolkit.api.entities.Shot: Shot object.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="vfxClientToolkit.api.sg.getShotgunHandle">
+<code class="sig-prename descclassname">vfxClientToolkit.api.sg.</code><code class="sig-name descname">getShotgunHandle</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vfxClientToolkit/api/sg.html#getShotgunHandle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vfxClientToolkit.api.sg.getShotgunHandle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns <cite>shotgun_api3.Shotgun</cite> object using the API key from the configuration files.</p>
+<dl class="simple">
+<dt>Returns:</dt><dd><p>shotgun_api3.shotgun.Shotgun: Configured Shotgun object.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="vfxClientToolkit.api.sg.getShotsByAttr">
+<code class="sig-prename descclassname">vfxClientToolkit.api.sg.</code><code class="sig-name descname">getShotsByAttr</code><span class="sig-paren">(</span><em class="sig-param">attrs</em>, <em class="sig-param">sg</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vfxClientToolkit/api/sg.html#getShotsByAttr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vfxClientToolkit.api.sg.getShotsByAttr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns list of <cite>vfxClientToolkit.api.entities.Version</cite> objects that match the attribute filter provided.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>param1 (list): Filter attribute.
+param2 (shotgun_api3.shotgun.Shotgun): Shotgun handle.</p>
+</dd>
+<dt>Returns:</dt><dd><p>list: Version objects in list that match filter criteria.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="vfxClientToolkit.api.sg.getShotsBySequence">
+<code class="sig-prename descclassname">vfxClientToolkit.api.sg.</code><code class="sig-name descname">getShotsBySequence</code><span class="sig-paren">(</span><em class="sig-param">sequenceCode</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vfxClientToolkit/api/sg.html#getShotsBySequence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vfxClientToolkit.api.sg.getShotsBySequence" title="Permalink to this definition">¶</a></dt>
+<dd><p>Collects and returns list of <cite>vfxClientToolkit.api.entities.Shot</cite> objects that below to provided sequence name.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>param1 (str): Name of sequence.</p>
+</dd>
+<dt>Returns:</dt><dd><p>list: List of Shot entities.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="vfxClientToolkit.api.sg.getVendors">
+<code class="sig-prename descclassname">vfxClientToolkit.api.sg.</code><code class="sig-name descname">getVendors</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vfxClientToolkit/api/sg.html#getVendors"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vfxClientToolkit.api.sg.getVendors" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns all delivery entities in Shotgun.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>param1 (shotgun_api3.shotgun.Shotgun): Shotgun handle.</p>
+</dd>
+<dt>Returns:</dt><dd><p>dict: Shotgun dictionary with entity info.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="vfxClientToolkit.api.sg.getVersion">
+<code class="sig-prename descclassname">vfxClientToolkit.api.sg.</code><code class="sig-name descname">getVersion</code><span class="sig-paren">(</span><em class="sig-param">name</em>, <em class="sig-param">sg</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vfxClientToolkit/api/sg.html#getVersion"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vfxClientToolkit.api.sg.getVersion" title="Permalink to this definition">¶</a></dt>
+<dd><p>Collects and returns <cite>vfxClientToolkit.api.entities.Version</cite> object.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>param1 (str): Name of version.
+param2 (shotgun_api3.shotgun.Shotgun): Shotgun handle.</p>
+</dd>
+<dt>Returns:</dt><dd><p>vfxClientToolkit.api.entities.Version: Version object.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="vfxClientToolkit.api.sg.getVersionsByAttr">
+<code class="sig-prename descclassname">vfxClientToolkit.api.sg.</code><code class="sig-name descname">getVersionsByAttr</code><span class="sig-paren">(</span><em class="sig-param">attrs</em>, <em class="sig-param">sg</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vfxClientToolkit/api/sg.html#getVersionsByAttr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vfxClientToolkit.api.sg.getVersionsByAttr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns list of <cite>vfxClientToolkit.api.entities.Version</cite> objects that match the attribute filter provided.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>param1 (list): Filter attribute.
+param2 (shotgun_api3.shotgun.Shotgun): Shotgun handle.</p>
+</dd>
+<dt>Returns:</dt><dd><p>list: Version objects in list that match filter criteria.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="vfxClientToolkit.api.sg.schemaRead">
+<code class="sig-prename descclassname">vfxClientToolkit.api.sg.</code><code class="sig-name descname">schemaRead</code><span class="sig-paren">(</span><em class="sig-param">entityType</em>, <em class="sig-param">fieldName</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vfxClientToolkit/api/sg.html#schemaRead"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vfxClientToolkit.api.sg.schemaRead" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns all delivery entities in Shotgun.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>param1 (shotgun_api3.shotgun.Shotgun): Shotgun handle.</p>
+</dd>
+<dt>Returns:</dt><dd><p>dict: Shotgun dictionary with entity info.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="entities.html" class="btn btn-neutral float-right" title="api.entities" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../tools/mrFilmOut.html" class="btn btn-neutral float-left" title="MrFilmOut" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, Dom Drane
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

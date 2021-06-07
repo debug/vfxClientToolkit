@@ -101,7 +101,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../tools/mrFilmOut.html">MrFilmOut</a></li>
 </ul>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../api.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/sg.html">api.sg</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/entities.html">api.entities</a></li>
 </ul>
 
             
@@ -179,7 +180,7 @@
 <span class="n">CONFIG_DATA</span> <span class="o">=</span> <span class="n">cb</span><span class="o">.</span><span class="n">getContexts</span><span class="p">()</span>
 
 
-<div class="viewcode-block" id="getShotgunHandle"><a class="viewcode-back" href="../../../api.html#vfxClientToolkit.api.sg.getShotgunHandle">[docs]</a><span class="k">def</span> <span class="nf">getShotgunHandle</span><span class="p">():</span>
+<div class="viewcode-block" id="getShotgunHandle"><a class="viewcode-back" href="../../../api/sg.html#vfxClientToolkit.api.sg.getShotgunHandle">[docs]</a><span class="k">def</span> <span class="nf">getShotgunHandle</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns `shotgun_api3.Shotgun` object using the API key from the configuration files.</span>
 
@@ -193,7 +194,7 @@
     <span class="k">return</span> <span class="n">sg</span></div>
 
 
-<div class="viewcode-block" id="getPlaylists"><a class="viewcode-back" href="../../../api.html#vfxClientToolkit.api.sg.getPlaylists">[docs]</a><span class="k">def</span> <span class="nf">getPlaylists</span><span class="p">(</span><span class="n">sg</span><span class="p">):</span>
+<div class="viewcode-block" id="getPlaylists"><a class="viewcode-back" href="../../../api/sg.html#vfxClientToolkit.api.sg.getPlaylists">[docs]</a><span class="k">def</span> <span class="nf">getPlaylists</span><span class="p">(</span><span class="n">sg</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns all playlists based on the show specified in the configuration file(s).</span>
 
@@ -213,7 +214,7 @@
     <span class="k">return</span> <span class="n">playlistObjs</span></div>
 
 
-<div class="viewcode-block" id="getProject"><a class="viewcode-back" href="../../../api.html#vfxClientToolkit.api.sg.getProject">[docs]</a><span class="k">def</span> <span class="nf">getProject</span><span class="p">():</span>
+<div class="viewcode-block" id="getProject"><a class="viewcode-back" href="../../../api/sg.html#vfxClientToolkit.api.sg.getProject">[docs]</a><span class="k">def</span> <span class="nf">getProject</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns Shotgun dictionary entity based on defined project in configuration file.</span>
 
@@ -231,7 +232,7 @@
     <span class="k">return</span> <span class="n">sg_project</span></div>
 
 
-<div class="viewcode-block" id="getSequences"><a class="viewcode-back" href="../../../api.html#vfxClientToolkit.api.sg.getSequences">[docs]</a><span class="k">def</span> <span class="nf">getSequences</span><span class="p">():</span>
+<div class="viewcode-block" id="getSequences"><a class="viewcode-back" href="../../../api/sg.html#vfxClientToolkit.api.sg.getSequences">[docs]</a><span class="k">def</span> <span class="nf">getSequences</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Collects and returns all sequences from the configured Shotgun projet.</span>
 
@@ -249,7 +250,7 @@
     <span class="k">return</span> <span class="n">seqObjs</span></div>
 
 
-<div class="viewcode-block" id="getSequence"><a class="viewcode-back" href="../../../api.html#vfxClientToolkit.api.sg.getSequence">[docs]</a><span class="k">def</span> <span class="nf">getSequence</span><span class="p">(</span><span class="n">sequenceName</span><span class="p">):</span>
+<div class="viewcode-block" id="getSequence"><a class="viewcode-back" href="../../../api/sg.html#vfxClientToolkit.api.sg.getSequence">[docs]</a><span class="k">def</span> <span class="nf">getSequence</span><span class="p">(</span><span class="n">sequenceName</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns sequence object based upon specified name.</span>
 
@@ -265,7 +266,7 @@
             <span class="k">return</span> <span class="n">sequence</span></div>
 
 
-<div class="viewcode-block" id="getShotsBySequence"><a class="viewcode-back" href="../../../api.html#vfxClientToolkit.api.sg.getShotsBySequence">[docs]</a><span class="k">def</span> <span class="nf">getShotsBySequence</span><span class="p">(</span><span class="n">sequenceCode</span><span class="p">):</span>
+<div class="viewcode-block" id="getShotsBySequence"><a class="viewcode-back" href="../../../api/sg.html#vfxClientToolkit.api.sg.getShotsBySequence">[docs]</a><span class="k">def</span> <span class="nf">getShotsBySequence</span><span class="p">(</span><span class="n">sequenceCode</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Collects and returns list of `vfxClientToolkit.api.entities.Shot` objects that below to provided sequence name.</span>
 
@@ -287,7 +288,7 @@
     <span class="k">return</span> <span class="n">shotObjs</span></div>
 
 
-<div class="viewcode-block" id="getShot"><a class="viewcode-back" href="../../../api.html#vfxClientToolkit.api.sg.getShot">[docs]</a><span class="k">def</span> <span class="nf">getShot</span><span class="p">(</span><span class="n">shotName</span><span class="p">,</span> <span class="n">sg</span><span class="p">):</span>
+<div class="viewcode-block" id="getShot"><a class="viewcode-back" href="../../../api/sg.html#vfxClientToolkit.api.sg.getShot">[docs]</a><span class="k">def</span> <span class="nf">getShot</span><span class="p">(</span><span class="n">shotName</span><span class="p">,</span> <span class="n">sg</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Collects and returns `vfxClientToolkit.api.entities.Shot` object.</span>
 
@@ -308,7 +309,7 @@
         <span class="k">return</span> <span class="kc">None</span></div>
 
 
-<div class="viewcode-block" id="getVersion"><a class="viewcode-back" href="../../../api.html#vfxClientToolkit.api.sg.getVersion">[docs]</a><span class="k">def</span> <span class="nf">getVersion</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">sg</span><span class="p">):</span>
+<div class="viewcode-block" id="getVersion"><a class="viewcode-back" href="../../../api/sg.html#vfxClientToolkit.api.sg.getVersion">[docs]</a><span class="k">def</span> <span class="nf">getVersion</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">sg</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Collects and returns `vfxClientToolkit.api.entities.Version` object.</span>
 
@@ -330,7 +331,7 @@
         <span class="k">return</span> <span class="n">versionObj</span></div>
 
 
-<div class="viewcode-block" id="getVersionsByAttr"><a class="viewcode-back" href="../../../api.html#vfxClientToolkit.api.sg.getVersionsByAttr">[docs]</a><span class="k">def</span> <span class="nf">getVersionsByAttr</span><span class="p">(</span><span class="n">attrs</span><span class="p">,</span> <span class="n">sg</span><span class="p">):</span>
+<div class="viewcode-block" id="getVersionsByAttr"><a class="viewcode-back" href="../../../api/sg.html#vfxClientToolkit.api.sg.getVersionsByAttr">[docs]</a><span class="k">def</span> <span class="nf">getVersionsByAttr</span><span class="p">(</span><span class="n">attrs</span><span class="p">,</span> <span class="n">sg</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns list of `vfxClientToolkit.api.entities.Version` objects that match the attribute filter provided.</span>
 
@@ -352,7 +353,7 @@
     <span class="k">return</span> <span class="n">versionObjs</span></div>
 
 
-<div class="viewcode-block" id="getShotsByAttr"><a class="viewcode-back" href="../../../api.html#vfxClientToolkit.api.sg.getShotsByAttr">[docs]</a><span class="k">def</span> <span class="nf">getShotsByAttr</span><span class="p">(</span><span class="n">attrs</span><span class="p">,</span> <span class="n">sg</span><span class="p">):</span>
+<div class="viewcode-block" id="getShotsByAttr"><a class="viewcode-back" href="../../../api/sg.html#vfxClientToolkit.api.sg.getShotsByAttr">[docs]</a><span class="k">def</span> <span class="nf">getShotsByAttr</span><span class="p">(</span><span class="n">attrs</span><span class="p">,</span> <span class="n">sg</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns list of `vfxClientToolkit.api.entities.Version` objects that match the attribute filter provided.</span>
 
@@ -374,7 +375,7 @@
     <span class="k">return</span> <span class="n">shotObjs</span></div>
 
 
-<div class="viewcode-block" id="getFields"><a class="viewcode-back" href="../../../api.html#vfxClientToolkit.api.sg.getFields">[docs]</a><span class="k">def</span> <span class="nf">getFields</span><span class="p">(</span><span class="n">entityName</span><span class="p">,</span> <span class="n">sg</span><span class="p">):</span>
+<div class="viewcode-block" id="getFields"><a class="viewcode-back" href="../../../api/sg.html#vfxClientToolkit.api.sg.getFields">[docs]</a><span class="k">def</span> <span class="nf">getFields</span><span class="p">(</span><span class="n">entityName</span><span class="p">,</span> <span class="n">sg</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns list of entity attributes based on the provided entity type.</span>
 
@@ -393,7 +394,7 @@
     <span class="k">return</span> <span class="n">allFields</span></div>
 
 
-<div class="viewcode-block" id="createPlaylist"><a class="viewcode-back" href="../../../api.html#vfxClientToolkit.api.sg.createPlaylist">[docs]</a><span class="k">def</span> <span class="nf">createPlaylist</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">versions</span><span class="p">):</span>
+<div class="viewcode-block" id="createPlaylist"><a class="viewcode-back" href="../../../api/sg.html#vfxClientToolkit.api.sg.createPlaylist">[docs]</a><span class="k">def</span> <span class="nf">createPlaylist</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">versions</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Creates playlist and adds provided versions to newly created list.</span>
 
@@ -426,7 +427,7 @@
     <span class="k">return</span> <span class="n">playlist</span></div>
 
 
-<div class="viewcode-block" id="getPlate"><a class="viewcode-back" href="../../../api.html#vfxClientToolkit.api.sg.getPlate">[docs]</a><span class="k">def</span> <span class="nf">getPlate</span><span class="p">(</span><span class="n">plateName</span><span class="p">,</span> <span class="n">sg</span><span class="p">):</span>
+<div class="viewcode-block" id="getPlate"><a class="viewcode-back" href="../../../api/sg.html#vfxClientToolkit.api.sg.getPlate">[docs]</a><span class="k">def</span> <span class="nf">getPlate</span><span class="p">(</span><span class="n">plateName</span><span class="p">,</span> <span class="n">sg</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Collects plate from Shotgun.</span>
 
@@ -443,7 +444,7 @@
     <span class="k">return</span> <span class="n">sgPlate</span></div>
 
 
-<div class="viewcode-block" id="createDeliveryEntity"><a class="viewcode-back" href="../../../api.html#vfxClientToolkit.api.sg.createDeliveryEntity">[docs]</a><span class="k">def</span> <span class="nf">createDeliveryEntity</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">addressedTo</span><span class="p">,</span> <span class="n">deliveryMethod</span><span class="p">,</span> <span class="n">sg</span><span class="p">):</span>
+<div class="viewcode-block" id="createDeliveryEntity"><a class="viewcode-back" href="../../../api/sg.html#vfxClientToolkit.api.sg.createDeliveryEntity">[docs]</a><span class="k">def</span> <span class="nf">createDeliveryEntity</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">addressedTo</span><span class="p">,</span> <span class="n">deliveryMethod</span><span class="p">,</span> <span class="n">sg</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Creates delivery entitiy in Shotgun.</span>
 
@@ -468,7 +469,7 @@
     <span class="k">return</span> <span class="n">entity</span></div>
 
 
-<div class="viewcode-block" id="getAllDeliveries"><a class="viewcode-back" href="../../../api.html#vfxClientToolkit.api.sg.getAllDeliveries">[docs]</a><span class="k">def</span> <span class="nf">getAllDeliveries</span><span class="p">(</span><span class="n">sg</span><span class="p">):</span>
+<div class="viewcode-block" id="getAllDeliveries"><a class="viewcode-back" href="../../../api/sg.html#vfxClientToolkit.api.sg.getAllDeliveries">[docs]</a><span class="k">def</span> <span class="nf">getAllDeliveries</span><span class="p">(</span><span class="n">sg</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns all delivery entities in Shotgun.</span>
 
@@ -492,7 +493,7 @@
         <span class="k">return</span> <span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
 
 
-<div class="viewcode-block" id="schemaRead"><a class="viewcode-back" href="../../../api.html#vfxClientToolkit.api.sg.schemaRead">[docs]</a><span class="k">def</span> <span class="nf">schemaRead</span><span class="p">(</span><span class="n">entityType</span><span class="p">,</span> <span class="n">fieldName</span><span class="p">):</span>
+<div class="viewcode-block" id="schemaRead"><a class="viewcode-back" href="../../../api/sg.html#vfxClientToolkit.api.sg.schemaRead">[docs]</a><span class="k">def</span> <span class="nf">schemaRead</span><span class="p">(</span><span class="n">entityType</span><span class="p">,</span> <span class="n">fieldName</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns all delivery entities in Shotgun.</span>
 
@@ -510,7 +511,7 @@
     <span class="k">return</span> <span class="n">values</span></div>
 
 
-<div class="viewcode-block" id="getVendors"><a class="viewcode-back" href="../../../api.html#vfxClientToolkit.api.sg.getVendors">[docs]</a><span class="k">def</span> <span class="nf">getVendors</span><span class="p">():</span>
+<div class="viewcode-block" id="getVendors"><a class="viewcode-back" href="../../../api/sg.html#vfxClientToolkit.api.sg.getVendors">[docs]</a><span class="k">def</span> <span class="nf">getVendors</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns all delivery entities in Shotgun.</span>
 
